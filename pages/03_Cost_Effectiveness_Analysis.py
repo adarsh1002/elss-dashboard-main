@@ -301,3 +301,73 @@ appealing to cost-conscious investors.  <b>HDFC</b> and <b>SBI</b> represent pre
     """,
     unsafe_allow_html=True
 )
+st.subheader("Cost Efficiency Analysis")
+st.markdown(
+    """
+<div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
+
+  <h4>Introduction: Cost Efficiency and Performance Alignment in ELSS Funds</h4>
+
+  <p>
+  In the realm of mutual fund evaluation, particularly for tax-saving instruments such as 
+  <b>Equity Linked Savings Schemes (ELSS)</b>, investors often focus primarily on absolute returns. 
+  However, this narrow perspective frequently overlooks the crucial influence of the <b>expense ratio</b> — 
+  the annual fee charged by fund houses to manage a scheme. 
+  For ELSS funds, where investments are mandatorily locked in for three years, 
+  even marginal differences in expense ratios can significantly affect an investor’s net returns over time.
+  </p>
+
+  <p>
+  Moreover, a scheme that appears superior based on high historical returns may, in reality, exhibit 
+  inconsistent or volatile performance. 
+  To derive a more accurate and representative understanding, this analysis employs 
+  <b>median values</b> for both returns and expense ratios rather than averages. 
+  Median values provide a robust measure of central tendency in datasets 
+  that are prone to outliers or skewed distributions — a common occurrence in financial markets.
+  </p>
+
+  <ul>
+    <li>Funds may record one-off extreme gains or losses in certain periods due to market shocks 
+    (e.g., the COVID-19 crash or rebound), which distort average return calculations.</li>
+    <li>Expense ratios may also temporarily fluctuate because of changes in Assets Under Management (AUM) 
+    or variations in operational expenses.</li>
+  </ul>
+
+  <p>
+  Accordingly, the <b>3-year return</b> has been chosen as the principal performance metric, 
+  aligning with the statutory lock-in period of ELSS under <b>Section 80C</b> of the Income Tax Act. 
+  ELSS funds, by design, require investors to remain invested for a minimum of three years, 
+  making short-term returns less meaningful. 
+  Evaluating performance over this horizon filters out market noise, 
+  capturing the true capability of fund managers to deliver consistent, sustainable value.
+  </p>
+
+  <p>
+  By using <b>median 3-year returns</b> alongside <b>median expense ratios</b>, 
+  the analysis presents a realistic picture of an investor’s typical experience. 
+  This approach removes distortions caused by outliers and improves comparability across schemes, 
+  helping assess consistency and cost-effectiveness over a multi-year investment horizon.
+  </p>
+
+  <h5>Methodological Overview</h5>
+  <p>
+  The relationship between cost and performance is examined through a 
+  <b>three-dimensional visualization</b>:
+  </p>
+
+  <ul>
+    <li><b>X-axis:</b> Median Expense Ratio (%) – representing the typical cost borne by the investor.</li>
+    <li><b>Y-axis:</b> Median 3-Year Return (%) – reflecting consistent investment performance.</li>
+    <li><b>Bubble Size & Label:</b> Average Sharpe Ratio – indicating the risk-adjusted efficiency of each fund.</li>
+  </ul>
+
+  <p>
+  Together, these dimensions provide a balanced perspective on 
+  <b>cost-to-performance efficiency</b> — revealing which ELSS schemes deliver the 
+  best blend of cost control, return stability, and risk-adjusted value for investors.
+  </p>
+
+</div>
+    """,
+    unsafe_allow_html=True
+)
