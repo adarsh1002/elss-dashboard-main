@@ -305,7 +305,7 @@ st.markdown(
     """
 <div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
 
-  <h4>Analysis Summary: Market Capitalization Allocation of ELSS Funds</h4>
+  <h4>Interpretation</h4>
 
   <p>
   The market capitalization analysis reveals that all selected <b>ELSS funds</b> maintain a strong foundation in 
@@ -357,3 +357,278 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+st.subheader("Sectoral Allocation Analysis")
+st.markdown(
+    """
+<div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
+
+  <h4>Analysis Summary: Sectoral Allocation of ELSS Funds</h4>
+
+  <p>
+  The <b>sectoral allocation analysis</b> of the selected <b>ELSS funds</b> reveals how different fund houses 
+  distribute their investments across key industries such as <b>Banking and Financial Services</b>, 
+  <b>Information Technology (Software)</b>, <b>Automobiles</b>, <b>Pharmaceuticals</b>, and 
+  <b>Consumer Durables</b>. 
+  This distribution reflects each fund’s <b>strategic preferences, thematic positioning,</b> 
+  and overall <b>risk orientation</b>.
+  </p>
+
+  <p>
+  Since mutual fund portfolios are actively managed and evolve in response to 
+  <b>market dynamics, macroeconomic conditions,</b> and <b>sectoral performance trends</b>, 
+  this analysis uses the <b>most recent half-yearly portfolio data (September 2024)</b>. 
+  Focusing on the latest dataset provides a clearer understanding of each fund’s 
+  <b>current investment outlook</b> and positioning, avoiding dilution of insights 
+  that may result from averaging across past, more volatile data periods.
+  </p>
+
+  <p>
+  Earlier portfolio disclosures indicate that sectoral exposures have shifted meaningfully over time, 
+  reflecting <b>tactical reallocations</b> by fund managers to capture emerging opportunities or mitigate risk. 
+  Some sectors—such as <b>Banking</b> and <b>Information Technology</b>—have remained consistently dominant, 
+  underscoring their foundational role in long-term equity portfolios. 
+  Others, including <b>Automobiles</b>, <b>Pharmaceuticals</b>, and <b>Consumer Goods</b>, 
+  show cyclical patterns of entry and exit aligned with 
+  <b>macroeconomic trends and growth phases</b>.
+  </p>
+
+  <p>
+  The sectoral allocation profile thus serves as a window into each fund’s 
+  <b>strategic focus</b> and <b>risk management approach</b>. 
+  Funds with concentrated exposure to cyclical or thematic sectors may demonstrate 
+  higher short-term volatility but potentially stronger upside during market expansions, 
+  while diversified sector exposure tends to enhance <b>stability and risk-adjusted performance</b>. 
+  By examining sectoral allocation patterns, investors can better understand 
+  the <b>economic themes</b> driving fund performance and assess 
+  whether a fund’s positioning aligns with their own <b>investment horizon and risk appetite</b>.
+  </p>
+
+</div>
+    """,
+    unsafe_allow_html=True
+)
+
+# Interactive Sectoral Allocation Dashboard (Plotly + Streamlit)
+import streamlit as st
+import pandas as pd
+import numpy as np
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+from math import ceil
+
+
+# ---------- CONFIG ----------
+DATA_PATH = "data/Data_obj4_MarketCap_final.xlsx"  # update path if needed
+date_col = "month_year"
+fund_col = "Fund House"
+industry_col = "Industry"
+contrib_col = "Contribution"  # contributions assumed decimal (0-1) or percent
+# ----------------------------
+
+@st.cache_data
+def load_df(path=DATA_PATH):
+    df = pd.read_excel(path)
+    df.columns = [c.strip() if isinstance(c, str) else c for c in df.columns]
+    # Parse month_year to timestamp (set to first of month)
+    if date_col in df.columns:
+        df["Date"] = pd.to_datetime(df[date_col], errors="coerce")
+        df["Period"] = df["Date"].dt.to_period("M").dt.to_timestamp()
+    else:
+        # fallback to any date-like col
+        date_cols = [c for c in df.columns if "date" in c.lower()]
+        df["Date"] = pd.to_datetime(df[date_cols[0]], errors="coerce") if date_cols else pd.NaT
+        df["Period"] = df["Date"].dt.to_period("M").dt.to_timestamp()
+    # Standardize names if needed
+    if fund_col not in df.columns:
+        cand = [c for c in df.columns if "fund" in c.lower() or "house" in c.lower() or "scheme" in c.lower()]
+        if cand:
+            df = df.rename(columns={cand[0]: fund_col})
+    if industry_col not in df.columns:
+        cand = [c for c in df.columns if "sector" in c.lower() or "industry" in c.lower()]
+        if cand:
+            df = df.rename(columns={cand[0]: industry_col})
+    if contrib_col not in df.columns:
+        cand = [c for c in df.columns if "contrib" in c.lower() or "weight" in c.lower() or "allocation" in c.lower()]
+        if cand:
+            df = df.rename(columns={cand[0]: contrib_col})
+    # Clean contribution
+    df[contrib_col] = pd.to_numeric(df[contrib_col], errors="coerce").fillna(0)
+    if df[contrib_col].max() <= 1.01:
+        df[contrib_col] = df[contrib_col] * 100  # convert fractional to percent
+    # Drop rows with missing essentials
+    df = df.dropna(subset=[fund_col, industry_col, "Period"]).copy()
+    # Aggregate duplicates
+    df = df.groupby([fund_col, "Period", industry_col], as_index=False)[contrib_col].sum()
+    return df
+
+# Load data
+try:
+    df = load_df()
+except FileNotFoundError:
+    st.error(f"Data file not found at {DATA_PATH}. Place file in data/ or update DATA_PATH.")
+    st.stop()
+except Exception as e:
+    st.error(f"Error loading data: {e}")
+    st.stop()
+
+# Available periods (sorted)
+periods = sorted(df["Period"].dropna().unique())
+if not periods:
+    st.info("No period data found.")
+    st.stop()
+period_labels = [p.strftime("%b %Y") for p in periods]
+period_map = dict(zip(period_labels, periods))
+label_map = {v: k for k, v in period_map.items()}
+
+# ---------- SIDEBAR CONTROLS ----------
+st.sidebar.header("Controls")
+# Month selector: slider (index) and selectbox (synced)
+idx = st.sidebar.slider("Select month index", 0, len(periods) - 1, len(periods) - 1)
+selected_period = periods[idx]
+sel_label = st.sidebar.selectbox("Or choose month", options=period_labels, index=idx)
+# sync selectbox override
+if sel_label:
+    selected_period = period_map[sel_label]
+
+# Top-N sectors for grouped bar
+top_n = st.sidebar.number_input("Top N sectors (grouped bar)", min_value=3, max_value=20, value=8, step=1)
+# Top-K per fund for pie
+top_k = st.sidebar.number_input("Top K sectors per fund (pie)", min_value=3, max_value=12, value=5, step=1)
+# Trend top M
+trend_m = st.sidebar.number_input("Top M sectors for trends", min_value=3, max_value=20, value=6, step=1)
+# Fund filter
+all_funds = sorted(df[fund_col].unique())
+selected_funds = st.sidebar.multiselect("Select Fund Houses", options=all_funds, default=all_funds)
+
+st.sidebar.markdown("---")
+st.sidebar.caption("Data is half-yearly from Mar 2020 (or as available).")
+
+# ---------- FILTER DATA ----------
+df_month = df[df["Period"] == selected_period].copy()
+if selected_funds:
+    df_month = df_month[df_month[fund_col].isin(selected_funds)].copy()
+if df_month.empty:
+    st.info("No data for selected month/funds.")
+    st.stop()
+
+# ---------- 1) Grouped bar: top N sectors overall (selected month) ----------
+st.subheader(f"Sectoral Allocation Comparison — {selected_period.strftime('%b %Y')}")
+
+# Determine top N sectors by total allocation across selected funds for the period
+top_sectors = (df_month.groupby(industry_col)[contrib_col].sum()
+               .sort_values(ascending=False)
+               .head(top_n)
+               .index.tolist())
+
+grouped = df_month[df_month[industry_col].isin(top_sectors)].copy()
+pivot = grouped.pivot(index=industry_col, columns=fund_col, values=contrib_col).fillna(0)
+# reindex sectors by top_sectors to keep order
+pivot = pivot.reindex(top_sectors)
+
+# Build stacked grouped bar (Plotly) but as grouped by industry with bars for funds
+fig_bar = go.Figure()
+for fund in pivot.columns:
+    fig_bar.add_trace(go.Bar(
+        x=pivot.index,
+        y=pivot[fund],
+        name=str(fund),
+        hovertemplate=f"<b>%{{x}}</b><br>{fund}: %{{y:.2f}}%<extra></extra>"
+    ))
+fig_bar.update_layout(
+    barmode="group",
+    title=f"Top {len(top_sectors)} Sectors — Allocation by Fund ({selected_period.strftime('%b %Y')})",
+    xaxis_title="Sector",
+    yaxis_title="Allocation (%)",
+    template="plotly_white",
+    height=500,
+    legend_title="Fund House",
+)
+st.plotly_chart(fig_bar, use_container_width=True)
+
+# Provide pivot download
+st.markdown("### Underlying pivot (selected month)")
+pivot_display = pivot.reset_index().rename(columns={industry_col: "Sector"})
+st.dataframe(pivot_display.style.format({c: "{:.2f}%" for c in pivot_display.columns if c != "Sector"}))
+
+@st.cache_data
+def to_csv_bytes(df_):
+    return df_.to_csv(index=False).encode("utf-8")
+
+st.download_button("Download pivot CSV", data=to_csv_bytes(pivot_display),
+                   file_name=f"sector_pivot_{selected_period.strftime('%Y_%m')}.csv",
+                   mime="text/csv")
+
+# ---------- 2) Pie (donut) charts: top-K sectors per fund ----------
+st.subheader(f"Top {top_k} Sectors per Fund — {selected_period.strftime('%b %Y')}")
+funds_for_pie = selected_funds if selected_funds else all_funds
+n_funds = len(funds_for_pie)
+cols = st.columns(2)
+
+# Prepare subplot for pies (use rows = ceil(n_funds/2))
+rows = ceil(n_funds / 2)
+fig_pies = make_subplots(rows=rows, cols=2, specs=[[{"type": "domain"}, {"type": "domain"}]] * rows,
+                         subplot_titles=funds_for_pie)
+
+r = c = 1
+for i, f in enumerate(funds_for_pie):
+    subset = df_month[df_month[fund_col] == f].copy()
+    if subset.empty:
+        labels = ["No data"]
+        sizes = [100]
+    else:
+        topk = subset.sort_values(contrib_col, ascending=False).head(top_k).copy()
+        labels = topk[industry_col].tolist()
+        sizes = topk[contrib_col].tolist()
+        others = max(0, 100 - sum(sizes))
+        if others > 0:
+            labels.append("Others")
+            sizes.append(others)
+    # compute row,col position
+    row = (i // 2) + 1
+    col = (i % 2) + 1
+    fig_pies.add_trace(go.Pie(labels=labels, values=sizes, hole=.4, textinfo='percent+label',
+                              hovertemplate="%{label}: %{value:.2f}%<extra></extra>"),
+                       row=row, col=col)
+
+fig_pies.update_layout(title_text=f"Top {top_k} Sectors (per Fund) — {selected_period.strftime('%b %Y')}",
+                       height=250 * rows, showlegend=False, template="plotly_white")
+st.plotly_chart(fig_pies, use_container_width=True)
+
+# ---------- 3) Sectoral Trends for Top M sectors across time (per fund) ----------
+st.subheader(f"Sectoral Trends — Top {trend_m} Sectors Across Time")
+# Determine top M sectors by average allocation across full sample (or restrict to selected funds)
+if selected_funds:
+    base_for_trend = df[df[fund_col].isin(selected_funds)]
+else:
+    base_for_trend = df
+top_trend_sectors = (base_for_trend.groupby(industry_col)[contrib_col].mean()
+                     .sort_values(ascending=False).head(trend_m).index.tolist())
+
+trend_df = df[df[industry_col].isin(top_trend_sectors)].copy()
+# Option: choose whether to show all selected funds or single fund focus
+trend_mode = st.radio("Trend view", options=["All selected funds (multiple lines)", "One fund at a time"], index=0)
+if trend_mode == "One fund at a time":
+    single = st.selectbox("Select fund for trend", options=selected_funds if selected_funds else all_funds)
+    funds_to_plot = [single]
+else:
+    funds_to_plot = selected_funds if selected_funds else all_funds
+
+# plot one chart per fund
+for f in funds_to_plot:
+    tmp = trend_df[trend_df[fund_col] == f]
+    if tmp.empty:
+        st.markdown(f"**{f}** — No data.")
+        continue
+    pivot_trend = tmp.pivot(index="Period", columns=industry_col, values=contrib_col).fillna(0)
+    pivot_trend = pivot_trend[top_trend_sectors] if set(top_trend_sectors).issubset(set(pivot_trend.columns)) else pivot_trend
+    fig_tr = go.Figure()
+    for sector in pivot_trend.columns:
+        fig_tr.add_trace(go.Scatter(x=pivot_trend.index, y=pivot_trend[sector], mode='lines+markers', name=sector,
+                                    hovertemplate=f"{sector}<br>%{{y:.2f}}% ({f})<extra></extra>"))
+    fig_tr.update_layout(title_text=f"Sectoral Allocation Trend — {f}", xaxis_title="Period", yaxis_title="Allocation (%)",
+                         template="plotly_white", height=420)
+    fig_tr.update_xaxes(tickformat="%b %Y", tickangle=45)
+    st.plotly_chart(fig_tr, use_container_width=True)
+
+st.markdown("---")
+st.caption("Tip: use the sidebar to change month, Top N/K/M values and filter funds. Charts are interactive — hover to inspect exact values.")
