@@ -538,33 +538,30 @@ st.markdown(
   cost-to-performance balance.
   </p>
 
-  <ul>
-    <li><b>Mirae Asset ELSS Tax Saver Fund:</b> The most cost-efficient fund, combining the <b>lowest median expense ratio (≈ 0.55%)</b> 
-    with the <b>highest median 3-year return (≈ 20.1%)</b> and a strong <b>Sharpe Ratio of 0.70</b>. 
-    It delivers maximum return per unit of cost and risk, ideal for long-term ELSS investors.</li>
+<ul>
+<li><b>Mirae Asset ELSS Tax Saver Fund:</b> The most cost-efficient fund, combining the <b>lowest median expense ratio (≈ 0.55%)</b> 
+with the <b>highest median 3-year return (≈ 20.1%)</b> and a strong <b>Sharpe Ratio of 0.70</b>. It delivers maximum return per unit of cost and risk, ideal for long-term ELSS investors.</li>
 
-    <li><b>DSP ELSS Tax Saver Fund:</b> Offers an excellent risk-return balance with a <b>median 3-year return of ≈ 19.8%</b> 
-    and a moderate <b>expense ratio of ≈ 0.82%</b>. 
-    Its <b>Sharpe Ratio (0.67)</b> indicates efficient risk management, making it a strong, balanced choice.</li>
+<li><b>DSP ELSS Tax Saver Fund:</b> Offers an excellent risk-return balance with a <b>median 3-year return of ≈ 19.8%</b> 
+    and a moderate <b>expense ratio of ≈ 0.82%</b>. Its <b>Sharpe Ratio (0.67)</b> indicates efficient risk management, making it a strong, balanced choice.</li>
 
-    <li><b>SBI Long Term Equity Fund:</b> Maintains a higher cost (<b>≈ 1.19%</b>) but compensates with robust returns (<b>≈ 18.6%</b>) 
-    and the <b>highest Sharpe Ratio (0.74)</b>. 
+<li><b>SBI Long Term Equity Fund:</b> Maintains a higher cost (<b>≈ 1.19%</b>) but compensates with robust returns (<b>≈ 18.6%</b>) and the <b>highest Sharpe Ratio (0.74)</b>. 
     Suitable for investors prioritizing <b>risk-adjusted efficiency</b> even at a slightly higher fee.</li>
 
-    <li><b>Axis ELSS Tax Saver Fund:</b> Displays the weakest performance, with <b>median return ≈ 12.9%</b> and <b>Sharpe Ratio 0.45</b>. 
-    While costs are moderate (<b>≈ 0.79%</b>), its limited return efficiency reduces overall attractiveness.</li>
+<li><b>Axis ELSS Tax Saver Fund:</b> Displays the weakest performance, with <b>median return ≈ 12.9%</b> and <b>Sharpe Ratio 0.45</b>. 
+While costs are moderate (<b>≈ 0.79%</b>), its limited return efficiency reduces overall attractiveness.</li>
 
-    <li><b>HDFC ELSS Tax Saver Fund:</b> The <b>least cost-efficient</b> option, showing the <b>highest expense ratio (≈ 1.23%)</b> 
-    and only <b>moderate returns (≈ 15.6%)</b>. 
-    Its <b>Sharpe Ratio (0.37)</b> is the lowest, indicating poor risk-adjusted performance relative to cost.</li>
-  </ul>
+<li><b>HDFC ELSS Tax Saver Fund:</b> The <b>least cost-efficient</b> option, showing the <b>highest expense ratio (≈ 1.23%)</b> 
+and only <b>moderate returns (≈ 15.6%)</b>. 
+Its <b>Sharpe Ratio (0.37)</b> is the lowest, indicating poor risk-adjusted performance relative to cost.</li>
+</ul>
 
-  <p>
-  The analysis demonstrates that <b>lower-cost schemes</b> such as Mirae Asset and DSP consistently outperform in both absolute and 
-  risk-adjusted terms, proving that efficient management can yield strong investor outcomes without high fees. 
-  Conversely, higher-cost options like HDFC and Axis underperformed in cost-return efficiency, while SBI maintained a premium 
-  position supported by superior risk control.
-  </p>
+<p>
+The analysis demonstrates that <b>lower-cost schemes</b> such as Mirae Asset and DSP consistently outperform in both absolute and 
+risk-adjusted terms, proving that efficient management can yield strong investor outcomes without high fees. 
+Conversely, higher-cost options like HDFC and Axis underperformed in cost-return efficiency, while SBI maintained a premium 
+position supported by superior risk control.
+</p>
 
   <h5>Summary of Findings</h5>
   <p>
@@ -580,6 +577,6 @@ st.markdown(
   </p>
 
 </div>
-    """,
+""",
     unsafe_allow_html=True
 )
