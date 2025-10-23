@@ -301,6 +301,59 @@ for cat in present_cols:
 # Show chart
 st.plotly_chart(fig, use_container_width=True)
 
-# Footer: quick month navigator help
-st.write("Use the sidebar slider or the select box to choose any available month. Data is half-yearly from Mar 2020 onward.")
+st.markdown(
+    """
+<div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
 
+  <h4>Analysis Summary: Market Capitalization Allocation of ELSS Funds</h4>
+
+  <p>
+  The market capitalization analysis reveals that all selected <b>ELSS funds</b> maintain a strong foundation in 
+  <b>large-cap equities</b>, consistent with their objective of achieving long-term capital appreciation 
+  while maintaining controlled risk. 
+  However, variations in <b>mid- and small-cap exposure</b> across the schemes highlight differing 
+  investment philosophies and levels of aggressiveness among fund houses.
+  </p>
+
+  <ul>
+    <li><b>Axis ELSS Tax Saver Fund:</b> Exhibits a pronounced large-cap bias (≈ 70.7%), 
+    moderate mid-cap exposure (≈ 23.8%), and minimal small-cap allocation (≈ 3%). 
+    This conservative structure prioritizes <b>stability and reduced volatility</b>.</li>
+
+    <li><b>HDFC ELSS Tax Saver Fund:</b> Follows a predominantly large-cap strategy (≈ 73.7%) 
+    complemented by small-cap exposure of around 11.6%, balancing <b>steady growth with limited risk-taking</b>.</li>
+
+    <li><b>DSP and Mirae Asset ELSS Funds:</b> Demonstrate more <b>aggressive allocation patterns</b> 
+    with smaller large-cap weights and higher small-cap exposure — 
+    14.5% for DSP and 21.9% for Mirae Asset — reflecting a <b>higher risk-reward orientation</b>.</li>
+
+    <li><b>SBI Long Term Equity Fund:</b> Maintains a <b>balanced and diversified allocation</b> 
+    across all segments, with slightly higher liquidity (≈ 8.9%) to manage short-term market fluctuations.</li>
+  </ul>
+
+  <p>
+  Funds with higher <b>mid- and small-cap exposure</b> — such as <b>DSP, Mirae Asset,</b> and <b>SBI</b> — 
+  adopted a more aggressive strategy aimed at generating higher alpha. 
+  Their superior <b>CAGR performance (≈ 21–25%)</b> over 2020–2024 
+  supports the view that mid- and small-cap equities tend to outperform during 
+  periods of <b>economic recovery and expansion</b>. 
+  Conversely, large-cap heavy funds like <b>Axis ELSS</b>, while stable, 
+  posted more modest returns (≈ 14.05%) due to their conservative positioning.
+  </p>
+
+  <p>
+  Overall, the findings highlight that a <b>balanced market-cap allocation</b> strategy — 
+  combining the stability of large-caps with selective mid- and small-cap exposure — 
+  delivers the most effective balance between <b>risk and return</b>. 
+  Funds such as <b>SBI</b> and <b>HDFC ELSS</b> achieved this equilibrium, 
+  reflecting efficient portfolio construction and superior <b>risk-adjusted performance</b>. 
+  Meanwhile, the higher volatility observed in <b>Mirae Asset</b> and <b>DSP</b> 
+  underscores the trade-off between aggressive growth potential and market sensitivity. 
+  This analysis reinforces that <b>diversified market-cap exposure</b> is key to 
+  optimizing long-term performance and managing downside risk in ELSS portfolios.
+  </p>
+
+</div>
+    """,
+    unsafe_allow_html=True
+)
