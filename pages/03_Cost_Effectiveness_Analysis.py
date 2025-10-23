@@ -530,7 +530,7 @@ st.markdown(
     """
 <div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
 
-  <h4>Interpretation: Cost-Effectiveness and Performance Alignment</h4>
+  <h4>Interpretation</h4>
 
   <p>
   Each bubble in the chart represents an <b>ELSS scheme</b>, with its size proportional to the <b>average Sharpe Ratio</b>—a measure of risk-adjusted efficiency. 
@@ -563,7 +563,7 @@ Conversely, higher-cost options like HDFC and Axis underperformed in cost-return
 position supported by superior risk control.
 </p>
 
-  <h5>Summary of Findings</h5>
+  <h3>Summary of Findings</h3>
   <p>
   This chapter evaluated the <b>cost-effectiveness</b> of leading ELSS funds by examining <b>expense ratios</b>, 
   <b>3-year returns</b>, and <b>Sharpe Ratios</b>. 
