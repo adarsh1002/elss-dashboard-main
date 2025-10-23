@@ -60,7 +60,7 @@ import pandas as pd
 import plotly.graph_objects as go
 
 # Load the data
-file_path = 'Sampled_perf_direct.xlsx'
+file_path = 'data/Data_Obj1.xlsx'
 
 df = pd.read_excel(file_path, sheet_name='Sheet1')
 
