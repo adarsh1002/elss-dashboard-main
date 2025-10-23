@@ -1,13 +1,15 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import plotly.graph_objects as go
+from datetime import datetime
 st.set_page_config(page_title="Portfolio Analysis", layout="wide")
 st.title("Portfolio Analysis")
 st.markdown(
     """
 <div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
 
-  <h4>Objective 4: Portfolio Composition and Allocation Analysis</h4>
+  <h4>Introduction</h4>
 
   <p>
   In mutual fund analysis, <b>portfolio composition</b> plays a pivotal role in shaping the 
@@ -74,3 +76,229 @@ to illustrate diversification and dominance across key sectors.</li>
     """,
     unsafe_allow_html=True
 )
+st.subheader("Market Capitalization Analysis")
+st.markdown(
+    """
+<div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
+
+  <h4>Summary: Market Capitalization Allocation and Risk Profile</h4>
+
+  <p>
+  A crucial dimension of a mutual fund’s investment strategy lies in its allocation across different 
+  <b>market capitalizations</b> — namely <b>Large-Cap</b>, <b>Mid-Cap</b>, and <b>Small-Cap</b> companies. 
+  This distribution provides direct insight into the fund’s <b>risk appetite</b> and its primary sources of expected returns.
+  </p>
+
+  <ul>
+<li><b>Large-Cap Stocks:</b> Represent well-established, financially stable companies that offer steady but relatively slower growth. 
+A fund with a heavy large-cap orientation reflects a <b>conservative and risk-averse strategy</b>, emphasizing capital preservation and consistent long-term performance.</li>
+
+<li><b>Mid-Cap Stocks:</b> Consist of companies in their expansion or high-growth phase. These investments strike a balance between <b>stability and growth potential</b>, 
+    though they carry greater risk than large-cap exposures.</li>
+
+<li><b>Small-Cap Stocks:</b> Comprise smaller, often emerging companies with the highest potential for returns — 
+    but also the greatest volatility. A higher allocation to small-caps signifies a <b>more aggressive investment stance</b>, 
+    aiming for higher alpha but with elevated short-term risk.</li>
+</ul>
+
+  <p>
+  For <b>Equity Linked Savings Schemes (ELSS)</b>, which feature a mandatory three-year lock-in period, 
+  fund managers have the flexibility to invest dynamically across market-cap segments to 
+  balance <b>risk and long-term return potential</b>. 
+  Examining the market-cap composition of the top five ELSS funds allows investors to 
+  look beyond stated objectives and assess the actual <b>risk–return trade-offs</b> reflected in portfolio construction.
+  </p>
+
+  <p>
+  This analysis highlights whether each fund leans toward the <b>stability of blue-chip large-caps</b> 
+  or ventures into <b>mid and small-cap equities</b> in pursuit of higher growth. 
+  By understanding these allocation patterns, investors can gauge how each fund’s 
+  strategic positioning aligns with their own <b>risk tolerance and investment horizon</b>.
+  </p>
+
+</div>
+    """,
+    unsafe_allow_html=True
+)
+DATA_PATH = "data/Data_obj4_MarketCap_final.xlsx"  # adjust if needed
+
+@st.cache_data
+def load_marketcap_data(path=DATA_PATH):
+    df = pd.read_excel(path)
+    df.columns = [c.strip() if isinstance(c, str) else c for c in df.columns]
+
+    # Parse month_year robustly
+    if "month_year" in df.columns:
+        # try common formats, fallback to pandas to_datetime
+        df["Date"] = pd.to_datetime(df["month_year"], errors="coerce", dayfirst=False)
+        # normalize to period start (first of month)
+        df["Date"] = pd.to_datetime(df["Date"].dt.to_period("M").dt.to_timestamp())
+    else:
+        # fallback: try to find a date-like column
+        date_cols = [c for c in df.columns if "date" in c.lower()]
+        if date_cols:
+            df["Date"] = pd.to_datetime(df[date_cols[0]], errors="coerce")
+        else:
+            df["Date"] = pd.NaT
+
+    # Ensure columns we need exist
+    # Expected columns in your sheet: Fund House (or similar), Categorization (Large/Mid/Small), Contribution (as fraction)
+    # Try to detect names
+    col_names = { "fund": None, "cat": None, "contrib": None }
+    for c in df.columns:
+        cl = str(c).lower()
+        if ("fund" in cl or "house" in cl or "scheme" in cl) and col_names["fund"] is None:
+            col_names["fund"] = c
+        if ("categor" in cl or "cap" in cl or "segment" in cl) and col_names["cat"] is None:
+            col_names["cat"] = c
+        if ("contrib" in cl or "contribution" in cl or "weight" in cl or "allocation" in cl) and col_names["contrib"] is None:
+            col_names["contrib"] = c
+
+    if None in col_names.values():
+        raise ValueError(f"Could not detect required columns automatically. Found columns: {df.columns.tolist()}")
+
+    df = df.rename(columns={col_names["fund"]: "Fund House",
+                            col_names["cat"]: "Categorization",
+                            col_names["contrib"]: "Contribution"})
+
+    # Ensure Contribution numeric (fractional or percent)
+    df["Contribution"] = (
+        df["Contribution"].astype(str)
+        .str.replace("%", "", regex=False)
+        .str.replace(",", "", regex=False)
+        .str.replace(r"[^\d\.\-]", "", regex=True)
+        .replace("", np.nan)
+    )
+    df["Contribution"] = pd.to_numeric(df["Contribution"], errors="coerce")
+    # if contributions look like fractions (0-1), convert to percent
+    if df["Contribution"].max() <= 1.01:
+        df["Contribution"] = df["Contribution"] * 100
+
+    # Drop rows without date/fund/category/contribution
+    df = df.dropna(subset=["Date", "Fund House", "Categorization", "Contribution"]).copy()
+
+    # Standardize categorization names (optional)
+    df["Categorization"] = df["Categorization"].str.strip().replace({
+        "Large": "Large Cap", "LargeCap": "Large Cap", "Large-Cap": "Large Cap",
+        "Mid": "Mid Cap", "MidCap": "Mid Cap", "Mid-Cap": "Mid Cap",
+        "Small": "Small Cap", "SmallCap": "Small Cap", "Small-Cap": "Small Cap"
+    })
+
+    return df
+
+# Load data
+try:
+    df = load_marketcap_data()
+except Exception as e:
+    st.error(f"Error loading market-cap file: {e}")
+    st.stop()
+
+# Build list of available months sorted
+available_months = sorted(df["Date"].dropna().unique())
+if len(available_months) == 0:
+    st.info("No month_year data found in file.")
+    st.stop()
+
+# Human-friendly labels
+month_labels = [d.strftime("%b %Y") for d in available_months]
+month_to_label = dict(zip(available_months, month_labels))
+label_to_month = {v: k for k, v in month_to_label.items()}
+
+# Sidebar controls
+st.sidebar.header("Month selection")
+# slider index-based for nicer UX
+idx = st.sidebar.slider("Select month index", 0, len(available_months)-1, len(available_months)-1)
+selected_date = available_months[idx]
+
+# Also show selectbox synced
+sel_label = st.sidebar.selectbox("Or choose month", options=month_labels, index=idx)
+# sync if user picks selectbox
+if sel_label:
+    selected_date = label_to_month[sel_label]
+    # update slider to reflect selection (display only; cannot programmatically set slider value easily)
+# Optionally select funds
+all_funds = sorted(df["Fund House"].unique().tolist())
+selected_funds = st.sidebar.multiselect("Select Fund Houses (leave empty = all)", options=all_funds, default=all_funds)
+
+# Filter to selected month and funds
+df_sel = df[df["Date"] == selected_date].copy()
+if selected_funds:
+    df_sel = df_sel[df_sel["Fund House"].isin(selected_funds)].copy()
+
+if df_sel.empty:
+    st.info("No data for the selected month / funds.")
+    st.stop()
+
+# Aggregate contributions per fund & category
+agg = df_sel.groupby(["Fund House", "Categorization"], as_index=False)["Contribution"].sum()
+# convert to percent already handled
+# Pivot
+pivot = agg.pivot(index="Fund House", columns="Categorization", values="Contribution").fillna(0)
+
+# Compute Cash & Other Holdings = 100 - sum(equity categories)
+pivot["Total Equity"] = pivot.sum(axis=1)
+pivot["Cash & Other Holdings"] = (100 - pivot["Total Equity"]).clip(lower=0)  # no negative
+
+# Drop temporary
+pivot = pivot.drop(columns=["Total Equity"])
+
+# Reorder columns
+cap_order = ["Large Cap", "Mid Cap", "Small Cap", "Cash & Other Holdings"]
+present_cols = [c for c in cap_order if c in pivot.columns]
+pivot = pivot[present_cols]
+
+# Prepare plotting order for consistent colors
+funds_order = pivot.index.tolist()
+
+# Build Plotly stacked bars (one trace per category)
+colors = {
+    "Large Cap": "#577590",
+    "Mid Cap": "#90be6d",
+    "Small Cap": "#f4a259",
+    "Cash & Other Holdings": "#9a8c98"
+}
+fig = go.Figure()
+for cat in present_cols:
+    fig.add_trace(go.Bar(
+        name=cat,
+        x=funds_order,
+        y=pivot[cat].round(2),
+        marker_color=colors.get(cat, None),
+        hovertemplate="<b>%{x}</b><br>%{y:.2f}% " + f"({cat})<extra></extra>"
+    ))
+
+# Layout
+fig.update_layout(
+    barmode="stack",
+    title=f"Market Cap Allocation of Selected ELSS Funds — {selected_date.strftime('%b %Y')}",
+    xaxis_title="Fund House",
+    yaxis_title="Allocation (%)",
+    yaxis=dict(range=[0, 100], ticksuffix="%"),
+    legend_title="Category",
+    template="plotly_white",
+    height=600,
+    margin=dict(l=80, r=80, t=100, b=140)
+)
+
+# Add percentage labels inside segments (Plotly supports textinfo per bar; we'll add total stacked annotations per bar)
+# Create cumulative sums for label positioning
+cumulative = np.zeros(len(funds_order))
+for cat in present_cols:
+    yvals = pivot[cat].round(2).values
+    # position where to put text (only if segment > threshold)
+    texts = [f"{v:.1f}%" if v >= 3 else "" for v in yvals]  # skip tiny slices
+    fig.add_trace(go.Bar(
+        x=funds_order,
+        y=[0]*len(yvals),  # invisible helper series just to use textposition; skip adding if not desired
+        text=texts,
+        textposition='inside',
+        showlegend=False,
+        marker_opacity=0
+    ))
+    cumulative += yvals
+
+# Show chart
+st.plotly_chart(fig, use_container_width=True)
+
+# Footer: quick month navigator help
+st.caption("Use the sidebar slider or the select box to choose any available month. Data is half-yearly from Mar 2020 onward.")
