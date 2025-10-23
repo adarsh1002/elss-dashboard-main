@@ -46,7 +46,7 @@ st.markdown(
     Where data gaps existed, official websites were used to extract TER information for Direct Plans.</li>
 
     <li><b>Time Period:</b> Data was compiled for the five calendar years from 2020 to 2024, 
-        aligning with the study’s broader temporal scope. When monthly data was available, it was averaged to obtain annualized TERs.</li>
+        aligning with the study's broader temporal scope. When monthly data was available, it was averaged to obtain annualized TERs.</li>
 
     <li><b>Data Processing:</b> Python scripts were utilized to automate data extraction and compute annual averages for each fund, ensuring consistency and accuracy in analysis.</li>
 
@@ -61,9 +61,9 @@ st.markdown(
 
     <li><b>Key Metrics Derived:</b>
       <ul>
-        <li><b>5-Year Average TER</b> – to compare long-term cost positions.</li>
-        <li><b>Return per Expense Ratio Unit</b> – calculated as 5-year CAGR divided by average TER, indicating cost-efficiency of returns.</li>
-        <li><b>Fund Ranking</b> – based on cost-effectiveness metrics.</li>
+        <li><b>5-Year Average TER</b> - to compare long-term cost positions.</li>
+        <li><b>Return per Expense Ratio Unit</b> - calculated as 5-year CAGR divided by average TER, indicating cost-efficiency of returns.</li>
+        <li><b>Fund Ranking</b> - based on cost-effectiveness metrics.</li>
       </ul>
     </li>
   </ul>
