@@ -389,11 +389,11 @@ def load_and_clean_returns(path=RET_FILE):
         if not isinstance(col, str):
             continue
         lc = col.lower()
-        if "return 1" in lc or "1 year" in lc or "return_1" in lc:
+        if "return 1" in lc or "1 Year" in lc or "return_1" in lc:
             rename_map[col] = "Return_1Y"
-        if "return 3" in lc or "3 year" in lc or "return_3" in lc:
+        if "return 3" in lc or "3 Year" in lc or "return_3" in lc:
             rename_map[col] = "Return_3Y"
-        if "return 5" in lc or "5 year" in lc or "return_5" in lc:
+        if "return 5" in lc or "5 Year" in lc or "return_5" in lc:
             rename_map[col] = "Return_5Y"
     dfr = dfr.rename(columns=rename_map)
 
