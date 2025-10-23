@@ -185,4 +185,156 @@ st.markdown("""
             <div style="text-align: justify;">
 <b>Assets Under Management (AUM)</b> are influenced by (i) net investor inflows and (ii) capital appreciation. However, a large AUM does not inherently guarantee superior returns; 
             it might also lead to challenges in nimble portfolio management.</div>""", unsafe_allow_html=True)
+#AUM Growth Analysis Plotly Graph - Interactive
+# -------------------------
+# AUM Growth Analysis (below Indexed NAV chart)
+# -------------------------
+import numpy as np
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
 
+# File path (update if needed)
+AUM_FILE = "data/Data_Obj1.xlsx"  # your AUM excel file path
+
+@st.cache_data
+def load_and_clean_aum(path=AUM_FILE, sheet_name=None):
+    df_a = pd.read_excel(path, sheet_name=sheet_name)
+    df_a.columns = [c.strip() for c in df_a.columns]
+    # required columns check (try to detect)
+    if "NAV Date" not in df_a.columns:
+        # try common alternatives
+        possible_date_cols = [c for c in df_a.columns if "date" in c.lower()]
+        if possible_date_cols:
+            df_a = df_a.rename(columns={possible_date_cols[0]: "NAV Date"})
+        else:
+            raise ValueError("No NAV Date column found in AUM file.")
+    if "Scheme Name" not in df_a.columns:
+        possible_scheme_cols = [c for c in df_a.columns if "scheme" in c.lower() or "fund" in c.lower()]
+        if possible_scheme_cols:
+            df_a = df_a.rename(columns={possible_scheme_cols[0]: "Scheme Name"})
+        else:
+            raise ValueError("No Scheme Name column found in AUM file.")
+    # detect AUM column
+    aum_candidates = [c for c in df_a.columns if "AUM" in c.upper() or "Aum" in c or "daily aum" in c.lower()]
+    if aum_candidates:
+        aum_col = aum_candidates[0]
+    else:
+        # fallback: numeric columns other than NAV if present
+        numeric_cols = df_a.select_dtypes(include=[np.number]).columns.tolist()
+        # pick the numeric column that is not NAV if possible
+        aum_col = None
+        for c in numeric_cols:
+            if "nav" not in c.lower():
+                aum_col = c
+                break
+        if aum_col is None:
+            raise ValueError("Could not find an AUM column. Ensure your AUM file contains an AUM column.")
+    # standardize names
+    df_a = df_a.rename(columns={aum_col: "AUM", "NAV Date": "NAV Date", "Scheme Name": "Scheme Name"})
+    df_a["NAV Date"] = pd.to_datetime(df_a["NAV Date"], errors="coerce")
+    # clean AUM strings -> numeric
+    df_a["AUM"] = df_a["AUM"].astype(str).fillna("").str.strip()
+    df_a["AUM_clean"] = df_a["AUM"].str.replace(r"[^0-9.\-]", "", regex=True)
+    df_a["AUM_Cr"] = pd.to_numeric(df_a["AUM_clean"], errors="coerce")
+    df_a = df_a.dropna(subset=["NAV Date", "AUM_Cr", "Scheme Name"])
+    df_a = df_a.sort_values(["Scheme Name", "NAV Date"]).reset_index(drop=True)
+    return df_a
+
+# Load AUM data (handle errors gracefully)
+try:
+    aum_all = load_and_clean_aum()
+except FileNotFoundError:
+    st.error(f"AUM file not found: {AUM_FILE}. Please place it in the data/ folder.")
+    st.stop()
+except Exception as e:
+    st.error(f"Error loading AUM file: {e}")
+    st.stop()
+
+# Use same selected_schemes, start_date, end_date from top controls
+# If your main controls are named differently, update the variable names accordingly.
+if "selected_schemes" not in globals():
+    # fallback: use all schemes from AUM if selected_schemes not defined
+    selected_schemes = sorted(aum_all["Scheme Name"].unique().tolist())
+
+# Filter by date and scheme
+mask = (aum_all["NAV Date"].dt.date >= start_date) & (aum_all["NAV Date"].dt.date <= end_date)
+mask &= aum_all["Scheme Name"].isin(selected_schemes)
+aum_df = aum_all.loc[mask].copy()
+if aum_df.empty:
+    st.info("No AUM data for selected schemes / date range. Adjust controls.")
+else:
+    # compute last available AUM per scheme (within filtered range)
+    last_aum = aum_df.sort_values("NAV Date").groupby("Scheme Name", as_index=False).tail(1)
+    last_sorted = last_aum.sort_values("AUM_Cr", ascending=False)
+    ordered_schemes = last_sorted["Scheme Name"].tolist()
+    # choose top_n to show panels (limit to avoid too many panels)
+    top_n = min(len(ordered_schemes), 6)  # max 6 panels for layout
+    plot_schemes = ordered_schemes[:top_n]
+
+    # layout grid for panels
+    cols = 2
+    rows = (len(plot_schemes) + cols - 1) // cols
+
+    fig = make_subplots(rows=rows, cols=cols, subplot_titles=plot_schemes, shared_xaxes=False)
+
+    # add traces: background (all selected schemes) in light grey, highlighted in blue
+    for idx, focus in enumerate(plot_schemes):
+        r = idx // cols + 1
+        c = idx % cols + 1
+        # background traces (all selected_schemes)
+        for bg in selected_schemes:
+            bg_series = aum_df[aum_df["Scheme Name"] == bg]
+            if bg_series.empty:
+                continue
+            fig.add_trace(
+                go.Scatter(
+                    x=bg_series["NAV Date"],
+                    y=bg_series["AUM_Cr"],
+                    mode="lines",
+                    line=dict(color="lightgray", width=1),
+                    hoverinfo="skip",
+                    showlegend=False,
+                    name=f"bg-{bg}"
+                ),
+                row=r, col=c
+            )
+        # focused trace
+        focus_series = aum_df[aum_df["Scheme Name"] == focus]
+        fig.add_trace(
+            go.Scatter(
+                x=focus_series["NAV Date"],
+                y=focus_series["AUM_Cr"],
+                mode="lines+markers",
+                line=dict(color="#1f77b4", width=3),
+                marker=dict(size=4),
+                name=focus,
+                hovertemplate="<b>%{text}</b><br>Date: %{x|%d %b %Y}<br>AUM (Cr): %{y:,.2f}<extra></extra>",
+                text=[focus]*len(focus_series),
+                showlegend=False
+            ),
+            row=r, col=c
+        )
+        # axes titles
+        fig.update_xaxes(title_text="Date", row=r, col=c)
+        fig.update_yaxes(title_text="AUM (Cr.)", row=r, col=c)
+
+    fig.update_layout(
+        title_text=f"AUM Growth of Selected ELSS Funds (highlighted panels; top {top_n} by last AUM)",
+        template="plotly_white",
+        height=300 * rows,
+        margin=dict(t=100, b=60, l=60, r=60)
+    )
+
+    # render plot
+    st.subheader("AUM Growth (panels sorted by last available AUM)")
+    st.plotly_chart(fig, use_container_width=True)
+
+    # show last available AUM table and download
+    st.markdown("### Last available AUM (within selected range)")
+    st.dataframe(last_sorted[["Scheme Name", "NAV Date", "AUM_Cr"]].reset_index(drop=True).head(top_n))
+
+    @st.cache_data
+    def to_csv(df_):
+        return df_.to_csv(index=False).encode("utf-8")
+
+    st.download_button("Download cleaned AUM (CSV)", data=to_csv(aum_df), file_name="aum_cleaned.csv", mime="text/csv")
