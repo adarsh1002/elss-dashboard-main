@@ -144,6 +144,7 @@ def load_expense_data(path=DATA_PATH):
 
     # Drop rows missing essential items
     df = df.dropna(subset=["Scheme Name", "Expense Ratio"]).copy()
+    df = df[(df["Year"] >= 2020) & (df["Year"] <= 2024)]
     return df
 
 # Usage: load the df at top of the page
@@ -206,7 +207,7 @@ fig = px.box(
 )
 
 # Remove color legend (optional) and clean layout
-fig.update_layout(showlegend=False, height=700, margin=dict(l=180, r=40, t=80, b=60))
+fig.update_layout(showlegend=True, height=700, margin=dict(l=180, r=40, t=80, b=60))
 
 # Add mean and median annotations as scatter traces for each scheme
 # Create a mapping from scheme to y-position (categories -> numeric positions)
