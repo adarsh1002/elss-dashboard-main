@@ -11,4 +11,5 @@ st.markdown(
     Use the left sidebar (Pages) to open **Objective 1 — Historical Performance**.
     """
 )
+
 st.write("Data is expected in `data/nav_prices.csv`. See repository README for details.")
