@@ -160,9 +160,4 @@ fig.update_xaxes(type="category")  # keep discrete years in order
 # Display chart
 st.plotly_chart(fig, use_container_width=True)
 
-# Data table & download
-st.markdown("### Aggregated Data (Average Standard Deviation by Year & Scheme)")
-st.dataframe(agg.sort_values(["Year", "Standard Deviation"], ascending=[True, False]).reset_index(drop=True))
-
-@st.cache_data
-
+s
