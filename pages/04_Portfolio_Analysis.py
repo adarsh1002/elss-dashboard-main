@@ -482,13 +482,7 @@ label_map = {v: k for k, v in period_map.items()}
 
 # ---------- SIDEBAR CONTROLS ----------
 st.sidebar.header("Controls")
-# Month selector: slider (index) and selectbox (synced)
-idx = st.sidebar.slider("Select month index", 0, len(periods) - 1, len(periods) - 1)
-selected_period = periods[idx]
-sel_label = st.sidebar.selectbox("Or choose month", options=period_labels, index=idx)
-# sync selectbox override
-if sel_label:
-    selected_period = period_map[sel_label]
+
 
 # Top-N sectors for grouped bar
 top_n = st.sidebar.number_input("Top N sectors (grouped bar)", min_value=3, max_value=20, value=8, step=1)
@@ -496,15 +490,10 @@ top_n = st.sidebar.number_input("Top N sectors (grouped bar)", min_value=3, max_
 top_k = st.sidebar.number_input("Top K sectors per fund (pie)", min_value=3, max_value=12, value=5, step=1)
 # Trend top M
 trend_m = st.sidebar.number_input("Top M sectors for trends", min_value=3, max_value=20, value=6, step=1)
-# Fund filter
-all_funds = sorted(df[fund_col].unique())
-selected_funds = st.sidebar.multiselect("Select Fund Houses", options=all_funds, default=all_funds)
 
-st.sidebar.markdown("---")
-st.sidebar.caption("Data is half-yearly from Mar 2020 (or as available).")
 
 # ---------- FILTER DATA ----------
-df_month = df[df["Period"] == selected_period].copy()
+df_month = df[df["Period"] == selected_date].copy()
 if selected_funds:
     df_month = df_month[df_month[fund_col].isin(selected_funds)].copy()
 if df_month.empty:
@@ -512,7 +501,7 @@ if df_month.empty:
     st.stop()
 
 # ---------- 1) Grouped bar: top N sectors overall (selected month) ----------
-st.subheader(f"Sectoral Allocation Comparison — {selected_period.strftime('%b %Y')}")
+st.subheader(f"Sectoral Allocation Comparison — {selected_date.strftime('%b %Y')}")
 
 # Determine top N sectors by total allocation across selected funds for the period
 top_sectors = (df_month.groupby(industry_col)[contrib_col].sum()
@@ -536,7 +525,7 @@ for fund in pivot.columns:
     ))
 fig_bar.update_layout(
     barmode="group",
-    title=f"Top {len(top_sectors)} Sectors — Allocation by Fund ({selected_period.strftime('%b %Y')})",
+    title=f"Top {len(top_sectors)} Sectors — Allocation by Fund ({selected_date.strftime('%b %Y')})",
     xaxis_title="Sector",
     yaxis_title="Allocation (%)",
     template="plotly_white",
@@ -555,11 +544,11 @@ def to_csv_bytes(df_):
     return df_.to_csv(index=False).encode("utf-8")
 
 st.download_button("Download pivot CSV", data=to_csv_bytes(pivot_display),
-                   file_name=f"sector_pivot_{selected_period.strftime('%Y_%m')}.csv",
+                   file_name=f"sector_pivot_{selected_date.strftime('%Y_%m')}.csv",
                    mime="text/csv")
 
 # ---------- 2) Pie (donut) charts: top-K sectors per fund ----------
-st.subheader(f"Top {top_k} Sectors per Fund — {selected_period.strftime('%b %Y')}")
+st.subheader(f"Top {top_k} Sectors per Fund — {selected_date.strftime('%b %Y')}")
 funds_for_pie = selected_funds if selected_funds else all_funds
 n_funds = len(funds_for_pie)
 cols = st.columns(2)
