@@ -38,3 +38,15 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
+st.subheader("2.1 Risk Profile Analysis")
+st.markdown("""
+            <div style="text-align: justify;">
+             <h4>Standard deviation - Volatility Trend Analysis </h4>
+            <p>Standard deviation is a statistical measure that reflects the total volatility of a mutual fund's returns. It captures how much the fund's returns deviate from its average over time. A higher standard deviation implies a more volatile scheme, indicating a greater level of risk and unpredictability in its performance.
+To evaluate this aspect for ELSS schemes, a bar chart was constructed showing the average annual standard deviation for five leading ELSS funds from 2020 to 2024.
+</p>
+            </div>
+            
+            
+            """, unsafe_allow_html=True)
+
