@@ -328,13 +328,161 @@ else:
     # render plot
     st.subheader("AUM Growth (panels sorted by last available AUM)")
     st.plotly_chart(fig, use_container_width=True)
+text_Aum="""<div style="text-align: justify;">
+The figure shows the Assets Under Management (AUM) growth trajectories of the top 5 selected ELSS mutual fund schemes over the five-year period from 2020 to 2024. Each panel highlights one fund prominently in blue, while showing others in light gray for comparison. The panels are arranged based on the size of each fund’s AUM as of the latest available date, with the largest fund appearing first. 
+In mutual fund performance analysis, organizing funds based on the size of their Assets Under Management (AUM) provides a clearer and more meaningful comparison. Larger AUM generally indicates higher investor confidence, better fund stability, and greater management scalability.
+Sorting panels by AUM size enables readers to immediately identify which funds dominate the ELSS market in terms of investor assets, making it easier to interpret growth patterns in relation to market leadership. Moreover, this approach aligns the visualization with investment significance, emphasizing funds that have garnered larger market trust and scale over time. Hence, the sorting enhances the analytical rigor and practical relevance of the AUM growth study. Axis ELSS commands the largest AUM, yet it has struggled to translate asset scale into proportionate returns. SBI Long Term Equity Fund, with a significantly lower AUM, has outperformed Axis both in NAV growth and recent returns. Further, during the study period, the mutual fund has increased its AUM by 5 times which shows strong investor confidence in the fund as well as fund has delivered highest returns in the segment.
+Mirae Asset, despite having roughly half the AUM size of Axis, delivered superior NAV and returns growth, revealing efficient capital deployment.
+ DSP ELSS, operating at almost one-third the AUM size of Axis, still managed competitive returns, indicating lean and focused fund management practices.
+While Axis's AUM scale theoretically should have provided diversification benefits, its relative underperformance highlights the diminishing returns of scale beyond a 
+threshold—especially when agility and selective sector exposure become key to alpha generation.</div>"""
+st.markdown(text_Aum, unsafe_allow_html=True)
+st.subheader("1.3 Returns Trend Analysis")
+returns_text="""
+<div style="text-align: justify;">
+The performance of Equity Linked Savings Schemes (ELSS) over different investment horizons provides critical insights into their risk-return behavior and resilience to market cycles.
+ To facilitate a comprehensive assessment, the returns of five selected ELSS mutual funds were analyzed across three distinct timeframes — 1-Year, 3-Year, and 5-Year rolling returns — from January 2020 to December 2024.
+ The returns were plotted on separate panels for each investment horizon to capture nuances in short-term volatility, medium-term consistency, and long-term wealth creation capabilities. 
+ This approach offers a layered understanding of how each fund behaved during different market phases, including the pandemic-driven market crash, the subsequent recovery, and the broader economic cycles.
+ Important Note: Due to the shorter history of Mirae Asset ELSS Fund, 5-year returns should be interpreted with caution.
+</div>
+"""
+st.markdown(returns_text, unsafe_allow_html=True)
+# Returns Trend Analysis Plotly Graph - Interactive
+# -------------------------
+# -------------------------
+# Returns Trend Analysis (1Y / 3Y / 5Y) - main-body radio to select horizon
+# -------------------------
+import pandas as pd
+import numpy as np
+import plotly.express as px
 
-    # show last available AUM table and download
-    st.markdown("### Last available AUM (within selected range)")
-    st.dataframe(last_sorted[["Scheme Name", "NAV Date", "AUM_Cr"]].reset_index(drop=True).head(top_n))
+RET_FILE = "data/Data_Obj1.xlsx"  # your returns excel file path
+@st.cache_data
+def load_and_clean_returns(path=RET_FILE):
+    raw = pd.read_excel(path)
+    # if pandas returns dict (multiple sheets), take first
+    if isinstance(raw, dict):
+        raw = list(raw.values())[0].copy()
+    dfr = raw.copy()
+    # normalize column names
+    dfr.columns = [c.strip() if isinstance(c, str) else c for c in dfr.columns]
+    # detect NAV Date column
+    if "NAV Date" not in dfr.columns:
+        possible_date = [c for c in dfr.columns if isinstance(c, str) and "date" in c.lower()]
+        if possible_date:
+            dfr = dfr.rename(columns={possible_date[0]: "NAV Date"})
+        else:
+            raise ValueError("No NAV Date column found in returns file.")
+    # detect Scheme Name
+    if "Scheme Name" not in dfr.columns:
+        possible_scheme = [c for c in dfr.columns if isinstance(c, str) and ("scheme" in c.lower() or "fund" in c.lower())]
+        if possible_scheme:
+            dfr = dfr.rename(columns={possible_scheme[0]: "Scheme Name"})
+        else:
+            raise ValueError("No Scheme Name column found in returns file.")
+    # detect return columns and rename consistently
+    rename_map = {}
+    for col in dfr.columns:
+        if isinstance(col, str):
+            lc = col.lower()
+            if "return 1" in lc or "1 year" in lc or "return_1" in lc:
+                rename_map[col] = "Return_1Y"
+            if "return 3" in lc or "3 year" in lc or "return_3" in lc:
+                rename_map[col] = "Return_3Y"
+            if "return 5" in lc or "5 year" in lc or "return_5" in lc:
+                rename_map[col] = "Return_5Y"
+    dfr = dfr.rename(columns=rename_map)
+    # ensure the three return cols exist (may be missing some)
+    for c in ["Return_1Y", "Return_3Y", "Return_5Y"]:
+        if c not in dfr.columns:
+            dfr[c] = np.nan
+    # parse date and numeric
+    dfr["NAV Date"] = pd.to_datetime(dfr["NAV Date"], errors="coerce")
+    for c in ["Return_1Y", "Return_3Y", "Return_5Y"]:
+        dfr[c] = pd.to_numeric(dfr[c], errors="coerce")
+    # drop rows without essential info
+    dfr = dfr.dropna(subset=["NAV Date", "Scheme Name"])
+    dfr = dfr.sort_values(["Scheme Name", "NAV Date"]).reset_index(drop=True)
+    return dfr
 
-    @st.cache_data
-    def to_csv(df_):
-        return df_.to_csv(index=False).encode("utf-8")
+# Load returns
+try:
+    returns_all = load_and_clean_returns()
+except FileNotFoundError:
+    st.error(f"Returns file not found: {RET_FILE}. Please place it in the data/ folder.")
+    st.stop()
+except Exception as e:
+    st.error(f"Error loading returns file: {e}")
+    st.stop()
 
-    st.download_button("Download cleaned AUM (CSV)", data=to_csv(aum_df), file_name="aum_cleaned.csv", mime="text/csv")
+# Use existing sidebar controls if present; else create local ones
+if "selected_schemes" not in globals():
+    schemes_list = sorted(returns_all["Scheme Name"].unique().tolist())
+    selected_schemes = st.sidebar.multiselect("Select Schemes (returns)", options=schemes_list, default=schemes_list)
+if "start_date" not in globals():
+    min_dt = returns_all["NAV Date"].min().date()
+    max_dt = returns_all["NAV Date"].max().date()
+    start_date = st.sidebar.date_input("Start date (returns)", value=min_dt, min_value=min_dt, max_value=max_dt)
+    end_date = st.sidebar.date_input("End date (returns)", value=max_dt, min_value=min_dt, max_value=max_dt)
+
+# smoothing options in sidebar (shared)
+st.sidebar.write("Returns smoothing (optional)")
+smooth = st.sidebar.checkbox("Apply smoothing (rolling mean)", value=True)
+smooth_window = st.sidebar.selectbox("Smoothing window (months)", options=[1, 3, 6], index=1)
+
+# main-body radio to choose horizon
+st.subheader("Returns Trend Analysis")
+horizon = st.radio("Choose return horizon to display:", options=["1-Year", "3-Year", "5-Year"], index=0, horizontal=True)
+
+# map horizon to column
+hcol_map = {"1-Year": "Return_1Y", "3-Year": "Return_3Y", "5-Year": "Return_5Y"}
+selected_col = hcol_map[horizon]
+
+# filter data by date & selected schemes
+mask = (returns_all["NAV Date"].dt.date >= start_date) & (returns_all["NAV Date"].dt.date <= end_date)
+mask &= returns_all["Scheme Name"].isin(selected_schemes)
+returns_df = returns_all.loc[mask, ["Scheme Name", "NAV Date", selected_col]].dropna().copy()
+returns_df = returns_df.rename(columns={selected_col: "Return_pct"})
+
+if returns_df.empty:
+    st.info("No return data available for the selected horizon / schemes / date range. Adjust the controls.")
+else:
+    # optionally apply smoothing: resample monthly and rolling mean
+    if smooth and smooth_window > 1:
+        # resample each scheme to month-end and compute rolling mean over the months
+        tmp_list = []
+        for scheme, g in returns_df.groupby("Scheme Name"):
+            g = g.set_index("NAV Date").resample("M").last().dropna(subset=["Return_pct"])
+            if g.empty:
+                continue
+            # rolling mean over smooth_window periods
+            g["Return_sm"] = g["Return_pct"].rolling(window=smooth_window, min_periods=1).mean()
+            g = g.reset_index().rename(columns={"Return_sm": "Return_pct"})
+            g["Scheme Name"] = scheme
+            tmp_list.append(g[["Scheme Name", "NAV Date", "Return_pct"]])
+        if tmp_list:
+            plot_df = pd.concat(tmp_list, ignore_index=True)
+        else:
+            plot_df = returns_df.copy()
+    else:
+        plot_df = returns_df.copy()
+
+    # create interactive Plotly line chart (one line per scheme)
+    fig_ret = px.line(
+        plot_df,
+        x="NAV Date",
+        y="Return_pct",
+        color="Scheme Name",
+        labels={"Return_pct": f"{horizon} Return (%)", "NAV Date": "Date"},
+        template="plotly_white",
+        title=f"{horizon} Returns Trend across Selected Schemes"
+    )
+    fig_ret.update_traces(mode="lines+markers")
+    fig_ret.update_layout(hovermode="x unified", legend=dict(title="Scheme", orientation="v", x=1.02, y=1))
+    fig_ret.update_yaxes(ticksuffix="%", tickformat=".2f")
+    fig_ret.update_xaxes(rangeslider_visible=True)
+
+    st.plotly_chart(fig_ret, use_container_width=True)
+
+    
