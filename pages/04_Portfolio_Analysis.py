@@ -5,6 +5,7 @@ import plotly.graph_objects as go
 from datetime import datetime
 st.set_page_config(page_title="Portfolio Analysis", layout="wide")
 st.title("Portfolio Analysis")
+st.markdown(""" <hr style="border: 1px solid #cccccc;"> """, unsafe_allow_html=True)
 st.markdown(
     """
 <div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
@@ -81,7 +82,6 @@ st.markdown(
     """
 <div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
 
-  <h4>Summary: Market Capitalization Allocation and Risk Profile</h4>
 
   <p>
   A crucial dimension of a mutual fund’s investment strategy lies in its allocation across different 
@@ -687,7 +687,6 @@ def sectoral_trend_analysis_summary(selected_funds, all_funds_list):
     # Combined summary when all funds are selected
     all_funds_summary = """
     <div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
-    <h4>Summary Findings: Sectoral Trend Analysis (2020–2024)</h4>
     <p>
     The sectoral trend analysis reveals how the five selected <b>ELSS funds</b> dynamically adjusted
     their portfolio exposures across major industries — <b>Banking</b>, <b>Finance</b>, 

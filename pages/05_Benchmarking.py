@@ -7,11 +7,12 @@ st.set_page_config("Benchmarking", layout="wide"
                    )
 st.title("📊 Benchmarking"
          )
+st.markdown(""" <hr style="border: 1px solid #cccccc;"> """, unsafe_allow_html=True)
 st.markdown(
     """
 <div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
 
-  <h4>Introduction: Benchmarking ELSS Fund Performance</h4>
+  
 
   <p>
   Benchmarking mutual fund performance against appropriate market indices is a critical component of performance evaluation. 
@@ -349,7 +350,6 @@ st.markdown(
     """
 <div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
 
-<h4>Summary: Alpha-Based Benchmarking Analysis (3-Year Rolling Returns)</h4>
 
 <p>
 The faceted charts compare each ELSS fund’s <b>3-year rolling return</b> (solid line) with its <b>TRI benchmark</b> (dashed line). 

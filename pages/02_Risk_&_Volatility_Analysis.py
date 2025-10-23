@@ -3,10 +3,12 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import plotly.express as px
 st.set_page_config(page_title=" Risk & Volatility", layout="wide")
-st.title("2. Risk and Volatility Analysis")
+st.title("Risk and Volatility Analysis")
+st.markdown(""" <hr style="border: 1px solid #cccccc;"> """, unsafe_allow_html=True)
 st.subheader("Introduction")
 st.markdown(
     """
+    
     <div style="text-align: justify;">
       
       <p>
@@ -40,7 +42,7 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
-st.subheader("2.1 Risk Profile Analysis")
+st.subheader("Risk Profile Analysis")
 st.markdown("""
             <div style="text-align: justify;">
              <h4>Standard deviation - Volatility Trend Analysis </h4>
@@ -391,7 +393,7 @@ else:
 st.markdown(
     """
 <div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
-  <h4>Interpretation: Risk-Adjusted Performance (Sharpe Ratio Analysis)</h4>
+  
 
   <p>
   The chart highlights the evolution of <b>risk-adjusted performance</b> across the selected ELSS funds from 2020 to 2024. 
@@ -430,7 +432,7 @@ st.subheader("Beta-Sharpe Trajectory of ELSS Schemes")
 st.markdown(
     """
 <div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
-  <h4>Introduction: Beta–Sharpe Trajectory Analysis of ELSS Schemes</h4>
+  
 
   <p>
   This section employs a <b>visual trajectory-based approach</b> to assess how selected ELSS mutual funds have evolved over the five-year period from <b>2020 to 2024</b>. 
@@ -757,7 +759,7 @@ st.markdown(
     """
 <div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
 
-  <h4>Interpretation: Beta–Sharpe Trajectory Analysis of ELSS Schemes (2020–2024)</h4>
+  
 
   <p>
   Each panel highlights one scheme’s annual movement, with directional arrows indicating the evolution of its risk–return profile over time. 
@@ -855,12 +857,11 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.subheader("Chapter Summary")
+st.subheader("Risk Analysis Summary")
 st.markdown(
     """
 <div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
 
-  <h4>Summary of Risk Profile Findings</h4>
 
   <p>
   The multi-dimensional risk profile analysis—spanning <b>Standard Deviation</b> (volatility), 

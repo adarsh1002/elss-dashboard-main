@@ -3,26 +3,32 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import plotly.express as px
 st.set_page_config(page_title="Fund Performance Analysis", layout="wide")
-st.title("1. Comparative Analysis of Fund Performance")
+st.title("Comparative Analysis of Fund Performance")
 st.markdown("""
+            <hr style="border: 1px solid #cccccc;">
+
+<div style="text-align: justify;">
 The objective of this chapter is to conduct an in-depth comparative analysis of five leading ELSS mutual funds in India over the period 2020–2024. 
 By examining the interplay of NAV growth, Assets Under Management (AUM) dynamics, and multi-period return performances, 
 this chapter seeks to unveil critical insights into fund strategies, management efficiency, and investor behavior patterns. 
 Rather than treating performance metrics in isolation, a cross-linked approach is adopted to demonstrate how various factors—such as fund size, risk-taking ability, and sectoral exposure—collectively influence investor outcomes. 
-            """)
-st.subheader("1.1 NAV GROWTH ANALYSIS")
-st.markdown("""
+            </div>
+            """, unsafe_allow_html=True)
+st.subheader("NAV GROWTH ANALYSIS")
+st.markdown("""<div style="text-align: justify;">
 The Net Asset Value (NAV) represents the per-unit market value of a mutual fund.
 It is the price at which investors buy (purchase price) or sell (redemption price) units of a fund. 
 NAV is a critical indicator of a fund's performance, reflecting the market value of all securities held by the fund, after accounting for liabilities and expenses.
 A steadily growing NAV over time indicates efficient capital appreciation and good fund management, assuming consistent reinvestments and strong performance of the underlying portfolio assets. Thus, NAV trends provide insights into the fund's ability to generate returns and enhance investor wealth.
-""")
+</div>""", unsafe_allow_html=True)
+           
 st.markdown("""
+            <div style="text-align: justify;">
             The indexed NAVs for each scheme were plotted on a line graph. 
             This visualization enables the analysis of the comparative growth patterns of different funds over the study period. 
             Funds that show a steeper upward trajectory on the graph indicate stronger capital appreciation, while flatter lines suggest relatively slower growth.)
-            """)
-st.markdown("**Indexed NAV Trend of ELSS Mututal Funds( Jan 2020-Dec 2024) **")
+            </div>""", unsafe_allow_html=True)
+          
 # Load the data
 file_path = 'data/Data_Obj1.xlsx'
 df = pd.read_excel(file_path, sheet_name='Sheet1')
@@ -181,7 +187,7 @@ Funds like **HDFC** and **DSP** show relatively stable and consistent growth wit
 
 A comparative analysis with the **NIFTY 50** returns over the corresponding period, which stood at approximately **14% (NIFTY50 n.d.)**, indicates that all selected ELSS schemes significantly outperformed the benchmark index, with the exception of the **Axis ELSS Tax Saver Fund**. The performance of the Axis ELSS Tax Saver Fund was largely comparable to the NIFTY 50, reflecting a relatively modest return in contrast to its peers.
 """)
-st.subheader("1.2 ASSETS UNDER MANAGEMENT (AUM) ANALYSIS")
+st.subheader("ASSETS UNDER MANAGEMENT (AUM) ANALYSIS")
 st.markdown("""
             <div style="text-align: justify;">
 <b>Assets Under Management (AUM)</b> are influenced by (i) net investor inflows and (ii) capital appreciation. However, a large AUM does not inherently guarantee superior returns; 
@@ -331,14 +337,17 @@ else:
     st.plotly_chart(fig, use_container_width=True)
 text_Aum="""<div style="text-align: justify;">
 The figure shows the Assets Under Management (AUM) growth trajectories of the top 5 selected ELSS mutual fund schemes over the five-year period from 2020 to 2024. Each panel highlights one fund prominently in blue, while showing others in light gray for comparison. The panels are arranged based on the size of each fund’s AUM as of the latest available date, with the largest fund appearing first. 
-In mutual fund performance analysis, organizing funds based on the size of their Assets Under Management (AUM) provides a clearer and more meaningful comparison. Larger AUM generally indicates higher investor confidence, better fund stability, and greater management scalability.
-Sorting panels by AUM size enables readers to immediately identify which funds dominate the ELSS market in terms of investor assets, making it easier to interpret growth patterns in relation to market leadership. Moreover, this approach aligns the visualization with investment significance, emphasizing funds that have garnered larger market trust and scale over time. Hence, the sorting enhances the analytical rigor and practical relevance of the AUM growth study. Axis ELSS commands the largest AUM, yet it has struggled to translate asset scale into proportionate returns. SBI Long Term Equity Fund, with a significantly lower AUM, has outperformed Axis both in NAV growth and recent returns. Further, during the study period, the mutual fund has increased its AUM by 5 times which shows strong investor confidence in the fund as well as fund has delivered highest returns in the segment.
+In mutual fund performance analysis, organizing funds based on the size of their Assets Under Management (AUM) provides a clearer and more meaningful comparison. Larger AUM generally indicates higher investor confidence, better fund stability, and greater management scalability.</br>
+
+Sorting panels by AUM size enables readers to immediately identify which funds dominate the ELSS market in terms of investor assets, making it easier to interpret growth patterns in relation to market leadership. 
+Moreover, this approach aligns the visualization with investment significance, emphasizing funds that have garnered larger market trust and scale over time. 
+Hence, the sorting enhances the analytical rigor and practical relevance of the AUM growth study. Axis ELSS commands the largest AUM, yet it has struggled to translate asset scale into proportionate returns. SBI Long Term Equity Fund, with a significantly lower AUM, has outperformed Axis both in NAV growth and recent returns. Further, during the study period, the mutual fund has increased its AUM by 5 times which shows strong investor confidence in the fund as well as fund has delivered highest returns in the segment.
 Mirae Asset, despite having roughly half the AUM size of Axis, delivered superior NAV and returns growth, revealing efficient capital deployment.
  DSP ELSS, operating at almost one-third the AUM size of Axis, still managed competitive returns, indicating lean and focused fund management practices.
 While Axis's AUM scale theoretically should have provided diversification benefits, its relative underperformance highlights the diminishing returns of scale beyond a 
 threshold—especially when agility and selective sector exposure become key to alpha generation.</div>"""
 st.markdown(text_Aum, unsafe_allow_html=True)
-st.subheader("1.3 Returns Trend Analysis")
+st.subheader(" Returns Trend Analysis")
 returns_text="""
 <div style="text-align: justify;">
 The performance of Equity Linked Savings Schemes (ELSS) over different investment horizons provides critical insights into their risk-return behavior and resilience to market cycles.

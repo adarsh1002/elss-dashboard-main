@@ -6,6 +6,7 @@ import plotly.graph_objects as go
 
 st.set_page_config(page_title="Cost Effectiveness Analysis", layout="wide")
 st.title("Cost Effectiveness Analysis")
+st.markdown(""" <hr style="border: 1px solid #cccccc;"> """, unsafe_allow_html=True)
 st.sidebar.title("Cost Effectiveness Analysis")
 st.markdown(
     """
