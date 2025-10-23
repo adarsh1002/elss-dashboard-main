@@ -363,9 +363,6 @@ RET_FILE = "data/Data_Obj1.xlsx"  # your returns excel file path
 @st.cache_data
 def load_and_clean_returns(path=RET_FILE):
     raw = pd.read_excel(path)
-    # if pandas returns dict (multiple sheets), take first
-    if isinstance(raw, dict):
-        raw = list(raw.values())[0].copy()
     dfr = raw.copy()
     # normalize column names
     dfr.columns = [c.strip() if isinstance(c, str) else c for c in dfr.columns]
