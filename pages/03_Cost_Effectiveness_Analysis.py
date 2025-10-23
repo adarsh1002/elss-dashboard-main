@@ -46,30 +46,30 @@ st.markdown(
   <h5>Methodology Overview</h5>
 
     <ul>
-        <li><b>Data Sources:</b> Expense ratio data was primarily sourced from official fund fact sheets released monthly by the respective AMCs. 
-        Where data gaps existed, official websites were used to extract TER information for Direct Plans.</li>
-        <li><b>Time Period:</b> Data was compiled for the five calendar years from 2020 to 2024, aligning with the study's broader temporal scope. 
-        When monthly data was available, it was averaged to obtain annualized TERs.</li>
-        <li><b>Data Processing:</b> Python scripts were utilized to automate data extraction and compute annual averages for each fund, ensuring consistency and accuracy in analysis.</li>
-        <li><b>Comparative Analysis:</b> The following visualizations were employed to illustrate cost dynamics:
-            <ul>
-                <li>Year-wise TER trends across all funds.</li>
-                <li>Average TER comparison over five years.</li>
-                <li>Correlation between TER and 5-year CAGR returns to evaluate cost efficiency.</li>
-            </ul>
-        </li>
-        <li><b>Key Metrics Derived:</b>
-            <ul>
-                <li><b>5-Year Average TER</b> : to compare long-term cost positions.</li>
-                <li><b>Return per Expense Ratio Unit</b> : calculated as 5-year CAGR divided by average TER, indicating cost-efficiency of returns.</li>
-                <li><b>Fund Ranking</b> : based on cost-effectiveness metrics.</li>
-            </ul>
-        </li>
+    <li><b>Data Sources:</b> Expense ratio data was primarily sourced from official fund fact sheets released monthly by the respective AMCs. 
+    Where data gaps existed, official websites were used to extract TER information for Direct Plans.</li>
+    <li><b>Time Period:</b> Data was compiled for the five calendar years from 2020 to 2024, aligning with the study's broader temporal scope. 
+    When monthly data was available, it was averaged to obtain annualized TERs.</li>
+    <li><b>Data Processing:</b> Python scripts were utilized to automate data extraction and compute annual averages for each fund, ensuring consistency and accuracy in analysis.</li>
+    <li><b>Comparative Analysis:</b> The following visualizations were employed to illustrate cost dynamics:
+    <ul>
+        <li>Year-wise TER trends across all funds.</li>
+        <li>Average TER comparison over five years.</li>
+        <li>Correlation between TER and 5-year CAGR returns to evaluate cost efficiency.</li>
+    </ul>
+    </li>
+    <li><b>Key Metrics Derived:</b>
+    <ul>
+        <li><b>5-Year Average TER</b> : to compare long-term cost positions.</li>
+        <li><b>Return per Expense Ratio Unit</b> : calculated as 5-year CAGR divided by average TER, indicating cost-efficiency of returns.</li>
+        <li><b>Fund Ranking</b> : based on cost-effectiveness metrics.</li>
+    </ul>
+    </li>
     </ul>
 
      <p>
-        Overall, this analysis enables a nuanced understanding of <b>cost-to-return efficiency</b> within ELSS mutual funds, 
-        helping investors identify schemes that not only perform well but also optimize expenses for long-term wealth creation.
+    Overall, this analysis enables a nuanced understanding of <b>cost-to-return efficiency</b> within ELSS mutual funds, 
+    helping investors identify schemes that not only perform well but also optimize expenses for long-term wealth creation.
     </p>
 
 </div>
