@@ -2,6 +2,7 @@ import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
 import plotly.express as px
+st.set_page_config(page_title=" Risk & Volatility", layout="wide")
 st.title("2. Risk and Volatility Analysis")
 st.markdown(
     """
@@ -50,3 +51,130 @@ To evaluate this aspect for ELSS schemes, a bar chart was constructed showing th
             
             """, unsafe_allow_html=True)
 
+
+#analysis part
+# pages/Chapter2_Risk_Volatility.py
+import streamlit as st
+import pandas as pd
+import numpy as np
+import plotly.express as px
+
+
+
+DATA_PATH = "data/Data_Obective2_final.xlsx"  # adjust path if needed
+
+@st.cache_data
+def load_sd_data(path=DATA_PATH, sheet_name=0):
+    """Load, clean and return a DataFrame for standard deviation analysis."""
+    df = pd.read_excel(path, sheet_name=sheet_name)
+    # normalize column names
+    df.columns = [c.strip() if isinstance(c, str) else c for c in df.columns]
+    # required columns check
+    required = {"Date", "Scheme Name", "Standard Deviation"}
+    if not required.issubset(set(df.columns)):
+        raise ValueError(f"Input file must contain columns: {required}. Found: {set(df.columns)}")
+    # parse date and year
+    df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
+    df = df.dropna(subset=["Date", "Scheme Name", "Standard Deviation"]).copy()
+    df["Year"] = df["Date"].dt.year
+    # remove percentage signs and convert to numeric (defensive)
+    df["Standard Deviation"] = (
+        df["Standard Deviation"].astype(str)
+          .str.replace("%", "", regex=False)
+          .str.replace(",", "", regex=False)
+          .str.strip()
+    )
+    df["Standard Deviation"] = pd.to_numeric(df["Standard Deviation"], errors="coerce")
+    # drop rows where conversion failed
+    df = df.dropna(subset=["Standard Deviation"])
+    # exclude 2019 as in original code
+    df = df[df["Year"] != 2019].reset_index(drop=True)
+    return df
+
+# Load data
+try:
+    sd_raw = load_sd_data()
+except FileNotFoundError:
+    st.error(f"File not found: {DATA_PATH}. Please place the Excel file in the data/ folder.")
+    st.stop()
+except Exception as e:
+    st.error(f"Error loading STD data: {e}")
+    st.stop()
+
+# Sidebar controls (reuse shared variables if present)
+st.sidebar.header("Filters (Chapter 2)")
+all_schemes = sorted(sd_raw["Scheme Name"].unique().tolist())
+if "selected_schemes" in globals():
+    # if shared controls exist, use them
+    selected_schemes = [s for s in all_schemes if s in selected_schemes] if 'selected_schemes' in globals() else all_schemes
+else:
+    selected_schemes = st.sidebar.multiselect("Select Scheme(s)", options=all_schemes, default=all_schemes)
+
+years_sorted = sorted(sd_raw["Year"].unique())
+min_year, max_year = years_sorted[0], years_sorted[-1]
+selected_years = st.sidebar.multiselect("Select Year(s) to display", options=years_sorted, default=years_sorted)
+
+# Aggregation: average standard deviation by Year and Scheme
+agg = (
+    sd_raw[sd_raw["Scheme Name"].isin(selected_schemes) & sd_raw["Year"].isin(selected_years)]
+    .groupby(["Year", "Scheme Name"], as_index=False)["Standard Deviation"]
+    .mean()
+)
+
+if agg.empty:
+    st.info("No data available for the chosen scheme(s) / year(s). Adjust filters.")
+    st.stop()
+
+# Round values for display & plotting
+agg["Standard Deviation"] = agg["Standard Deviation"].round(2)
+
+# Create Plotly grouped bar chart
+fig = px.bar(
+    agg,
+    x="Year",
+    y="Standard Deviation",
+    color="Scheme Name",
+    barmode="group",
+    text="Standard Deviation",
+    labels={"Standard Deviation": "Standard Deviation (%)"},
+    category_orders={"Year": sorted(agg["Year"].unique())},
+    template="plotly_white",
+    title="Average Standard Deviation of ELSS Schemes by Year"
+)
+
+# Layout polish: legend on right, bigger size, margins for legend
+fig.update_layout(
+    legend=dict(title="Scheme Name", orientation="v", yanchor="top", y=0.98, xanchor="left", x=1.02),
+    margin=dict(t=100, b=80, l=60, r=220),
+    height=560,
+    width=None,
+    hovermode="x unified",
+    font=dict(size=13)
+)
+
+# Format text annotations and hover
+fig.update_traces(texttemplate="%{text:.2f}%", textposition="outside", marker_line_width=0.5)
+fig.update_yaxes(title_text="Standard Deviation (%)", showgrid=True, gridcolor="lightgray")
+fig.update_xaxes(type="category")  # keep discrete years in order
+
+# Display chart
+st.plotly_chart(fig, use_container_width=True)
+
+# Data table & download
+st.markdown("### Aggregated Data (Average Standard Deviation by Year & Scheme)")
+st.dataframe(agg.sort_values(["Year", "Standard Deviation"], ascending=[True, False]).reset_index(drop=True))
+
+@st.cache_data
+
+# Short explanatory note
+st.markdown(
+    """
+    <div style="text-align: justify;">
+    <small>
+    <b>Note:</b> Values shown are the annual average of monthly standard deviations reported for each scheme (2019 excluded). 
+    Standard deviation is expressed in percentage points. Hover over bars for exact values. Use the filters on the left to select different schemes and year ranges.
+    </small>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
