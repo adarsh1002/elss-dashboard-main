@@ -167,23 +167,16 @@ fig.update_xaxes(rangeslider_visible=True)   # allow range slider for quick zoom
 st.plotly_chart(fig, use_container_width=True)
 
 st.markdown("""
-            All five ELSS schemes have shown significant NAV growth over the five-year period, 
-            indicating positive returns for investors. Despite short-term volatilities, 
-            the general trajectory has been upward,
-             demonstrating the benefits of long-term investing in equity mutual funds. 
-            Fund-wise Performance:
--SBI Long Term Equity Fund has emerged as the top performer among the compared funds, achieving the highest indexed NAV, peaking above 320 during 2024 before a slight decline towards the year-end.
--DSP ELSS Tax Saver Fund and HDFC ELSS Tax Saver Fund closely follow SBI's performance, showcasing strong and consistent capital appreciation.
--Mirae Asset ELSS Tax Saver Fund also displays a robust growth pattern but slightly trails behind DSP and HDFC towards the end of the period.
-(Disclaimer: 5-year return history for Mirae Asset was partially unavailable; hence comparisons should be viewed accordingly.)
--Axis ELSS Tax Saver Fund, although starting similarly, significantly lags behind the other funds, with its growth plateauing relative to peers post-2022. This indicates a relatively underwhelming performance compared to the others in the latter part of the analysis period.
-Funds like HDFC and DSP show relatively stable and consistent growth with fewer sharp fluctuations. 
-SBI displayed higher volatility but also higher returns, reflecting a slightly more aggressive investment approach.
-             Axis, on the other hand, exhibited periods of stagnation, suggesting challenges in outperforming the broader market or peer group.
-A comparative analysis with the NIFTY 50 returns over the corresponding period, which stood at approximately 14% (NIFTY50 n.d.), 
-            indicates that all selected ELSS schemes significantly outperformed the benchmark index, 
-            with the exception of the Axis ELSS Tax Saver Fund. 
-            The performance of the Axis ELSS Tax Saver Fund was largely comparable to the NIFTY 50, 
-            reflecting a relatively modest return in contrast to its peers.
+### Fund-wise Performance
 
+- **SBI Long Term Equity Fund** has emerged as the top performer among the compared funds, achieving the highest indexed NAV, peaking above 320 during 2024 before a slight decline towards the year-end.  
+- **DSP ELSS Tax Saver Fund** and **HDFC ELSS Tax Saver Fund** closely follow SBI's performance, showcasing strong and consistent capital appreciation.  
+- **Mirae Asset ELSS Tax Saver Fund** also displays a robust growth pattern but slightly trails behind DSP and HDFC towards the end of the period.  
+  *(Disclaimer: 5-year return history for Mirae Asset was partially unavailable; hence comparisons should be viewed accordingly.)*  
+- **Axis ELSS Tax Saver Fund**, although starting similarly, significantly lags behind the other funds, with its growth plateauing relative to peers post-2022. This indicates a relatively underwhelming performance compared to the others in the latter part of the analysis period.  
+
+**Consistency and Volatility:**  
+Funds like **HDFC** and **DSP** show relatively stable and consistent growth with fewer sharp fluctuations. **SBI** displayed higher volatility but also higher returns, reflecting a slightly more aggressive investment approach. **Axis**, on the other hand, exhibited periods of stagnation, suggesting challenges in outperforming the broader market or peer group.  
+
+A comparative analysis with the **NIFTY 50** returns over the corresponding period, which stood at approximately **14% (NIFTY50 n.d.)**, indicates that all selected ELSS schemes significantly outperformed the benchmark index, with the exception of the **Axis ELSS Tax Saver Fund**. The performance of the Axis ELSS Tax Saver Fund was largely comparable to the NIFTY 50, reflecting a relatively modest return in contrast to its peers.
 """)
