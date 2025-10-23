@@ -184,5 +184,5 @@ st.subheader("1.2 ASSETS UNDER MANAGEMENT (AUM) ANALYSIS")
 st.markdown("""
             <div style="text-align: justify;">
 **Assets Under Management (AUM)** are influenced by (i) net investor inflows and (ii) capital appreciation. However, a large AUM does not inherently guarantee superior returns; 
-            it might also lead to challenges in nimble portfolio management.</div>""")
+            it might also lead to challenges in nimble portfolio management.</div>""", unsafe_allow_html=True)
 
