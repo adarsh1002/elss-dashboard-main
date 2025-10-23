@@ -504,7 +504,7 @@ else:
             template="plotly_white",
             title=f"{horizon} Returns Trend - Selected Schemes"
         )
-        fig.update_traces(mode="lines+markers")
+        fig.update_traces(mode="lines")
         fig.update_layout(hovermode="x unified",
                           legend=dict(title="Scheme", orientation="v", x=1.02, y=1))
         fig.update_yaxes(ticksuffix="%", tickformat=".2f")
@@ -537,15 +537,4 @@ else:
 
         st.plotly_chart(fig, use_container_width=True)
 
-        # Data preview & download
-        st.markdown("### Data used for this chart (preview)")
-        st.dataframe(plot_df.head(400))
-
-        @st.cache_data
-        def to_csv_bytes(df_):
-            return df_.to_csv(index=False).encode("utf-8")
-
-        st.download_button(f"Download {horizon} returns data (CSV)",
-                           data=to_csv_bytes(plot_df),
-                           file_name=f"returns_{horizon.replace(' ', '')}.csv",
-                           mime="text/csv")
+       
