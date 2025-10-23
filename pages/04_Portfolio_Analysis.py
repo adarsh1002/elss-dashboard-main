@@ -53,20 +53,16 @@ st.markdown(
   </p>
 
   <ul>
-    <li><b>1. Market Capitalization Allocation:</b> 
-    Data on fund-wise exposure to <b>large-cap</b>, <b>mid-cap</b>, and <b>small-cap equities</b> 
+<li><b>1. Market Capitalization Allocation:</b>  Data on fund-wise exposure to <b>large-cap</b>, <b>mid-cap</b>, and <b>small-cap equities</b> 
     was compiled and analyzed to understand asset allocation strategies and their evolution over time.</li>
 
-    <li><b>2. Sectoral Allocation:</b> 
-    Sector-wise investment data was aggregated to identify <b>concentration patterns</b>, 
-    <b>sector rotation</b>, and <b>thematic tilts</b>. 
-    Visualization tools such as <b>stacked bar charts</b> and <b>heatmaps</b> were employed 
-    to illustrate diversification and dominance across key sectors.</li>
+<li><b>2. Sectoral Allocation:</b>  Sector-wise investment data was aggregated to identify <b>concentration patterns</b>, 
+    <b>sector rotation</b>, and <b>thematic tilts</b>.  Visualization tools such as <b>stacked bar charts</b> and <b>heatmaps</b> were employed 
+to illustrate diversification and dominance across key sectors.</li>
 
-    <li><b>3. Fund Management Trends:</b> 
-    Changes in fund management and their possible influence on allocation and performance 
-    were qualitatively assessed to understand consistency and strategic alignment.</li>
-  </ul>
+<li><b>3. Fund Management Trends:</b>  Changes in fund management and their possible influence on allocation and performance 
+ were qualitatively assessed to understand consistency and strategic alignment.</li>
+</ul>
 
   <p>
   All data analysis and visualization were conducted using <b>Python</b> libraries 
