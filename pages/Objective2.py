@@ -387,4 +387,41 @@ else:
 
             st.plotly_chart(fig, use_container_width=True)
 
-           
+st.markdown(
+    """
+    <div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
+      <h4>Interpretation</h4>
+
+      <p>
+        The chart highlights the evolution of <b>risk-adjusted performance</b> across the selected ELSS funds from 2020 to 2024. 
+        While <b>Mirae Asset</b>, <b>SBI</b>, and <b>DSP ELSS</b> funds demonstrated consistent improvement, 
+        <b>Axis ELSS</b> exhibited a declining efficiency despite maintaining moderate risk levels. 
+        This divergence emphasizes the critical importance of evaluating <b>returns relative to risk</b> rather than focusing solely on absolute performance.
+      </p>
+
+      <h5>Key Insights</h5>
+      <ul>
+        <li><b>Mirae Asset ELSS Fund</b> and <b>SBI Long Term Equity Fund</b> consistently improved their Sharpe Ratios over the five-year period, 
+        reaching values above <b>1.0</b> by 2023–2024. 
+        This indicates efficient risk management and superior ability to deliver high-quality returns for the volatility undertaken.</li>
+
+        <li><b>DSP Tax Saver Fund</b> also showed a healthy trajectory, particularly after 2021, maintaining Sharpe Ratios near or above <b>1.0</b>. 
+        This reflects balanced risk-taking behavior and consistent performance under varying market conditions.</li>
+
+        <li><b>HDFC ELSS Tax Saver Fund</b> started with relatively low risk-adjusted efficiency but showed substantial improvement by 2024, 
+        indicating effective portfolio realignment and enhanced compensation for the risk undertaken.</li>
+
+        <li><b>Axis ELSS Tax Saver Fund</b>, despite moderate volatility, showed inconsistent Sharpe Ratios throughout the study period. 
+        Its declining trend after 2022 signals inefficiencies in converting risk exposure into meaningful returns, 
+        raising concerns about its ability to sustain performance during shifting market conditions.</li>
+      </ul>
+
+      <p>
+        Overall, this analysis reinforces that <b>risk-adjusted return</b> is a more meaningful measure of performance than raw returns alone. 
+        Funds such as <b>Mirae Asset</b>, <b>SBI</b>, and <b>DSP</b> emerged as <b>strong risk-adjusted performers</b>, 
+        demonstrating consistent value creation for the risk assumed, while <b>Axis ELSS</b> reflected a potential misalignment between volatility and return generation.
+      </p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
