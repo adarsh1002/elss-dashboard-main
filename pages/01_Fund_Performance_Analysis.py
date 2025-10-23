@@ -2,6 +2,7 @@ import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
 import plotly.express as px
+st.set_page_config(page_title="Fund Performance Analysis", layout="wide")
 st.title("1. Comparative Analysis of Fund Performance")
 st.markdown("""
 The objective of this chapter is to conduct an in-depth comparative analysis of five leading ELSS mutual funds in India over the period 2020–2024. 
