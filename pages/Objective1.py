@@ -573,7 +573,13 @@ All schemes exhibit smooth upward trends, indicating that equity investments rew
 </div>
 """
 st.markdown(text_an, unsafe_allow_html=True)
-
+text2="""
+<div style="text-align: justify;">
+The multi-period return analysis reveals that fund consistency across time horizons is critical to achieving financial goals. While short-term volatility may discourage investors, the 3-Year and especially 5-Year return trends reaffirm the value of staying invested through market cycles.
+The analysis highlights that SBI Long Term Equity Fund emerged as the most rewarding scheme, offering robust returns across all timeframes. On the other hand, Axis ELSS Tax Saver Fund, despite being among the largest in AUM terms, delivered returns that barely outpaced the market, indicating the importance of evaluating not just fund size but also historical performance, portfolio management quality, and return consistency. </br>
+Thus, for prospective investors, fund selection based on long-term historical performance, risk-adjusted returns, and fund manager capability remains critical when investing in ELSS products
+</div>"""
+st.markdown(text2, unsafe_allow_html=True)
 
 
 
