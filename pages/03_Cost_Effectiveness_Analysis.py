@@ -250,4 +250,73 @@ fig.update_yaxes(title_text="Scheme Name", automargin=True)
 # Display
 st.plotly_chart(fig, use_container_width=True)
 
-st.subheader("")
+st.markdown(
+    """
+<div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
+
+  <h4>Interpretation/h4>
+
+  <p>
+  Each box in the visualization represents the <b>interquartile range (IQR)</b>, 
+  with the horizontal line indicating the <b>median</b>. 
+  Blue and green annotations mark the <b>mean</b> and <b>median</b> values respectively, 
+  while the overlaid dots correspond to individual monthly Total Expense Ratio (TER) data points, 
+  capturing the stability or volatility in each fund’s cost structure over the five-year period.
+  </p>
+
+  <h5>Key Highlights</h5>
+
+  <ol>
+    <li><b>Central Tendencies (Mean & Median):</b> 
+      <p>
+      <b>HDFC ELSS Tax Saver Fund</b> records the highest average TER (1.22%) and median (1.23%), 
+      signifying a consistently higher cost structure. 
+      <b>Mirae Asset ELSS Fund</b> displays the lowest average TER (0.51%) and median (0.55%), 
+      making it the most cost-efficient among the compared schemes. 
+      For <b>Axis</b>, <b>DSP</b>, and <b>HDFC</b>, the proximity between mean and median suggests symmetrical distributions, 
+      indicating an absence of major skewness in their expense data.
+      </p>
+    </li>
+
+    <li><b>Dispersion and Variability:</b> 
+      <p>
+      <b>SBI Long Term Equity Fund</b> exhibits the widest IQR, implying higher variability in its monthly expense ratios. 
+      <b>Axis ELSS Tax Saver Fund</b> has the narrowest box, showing a highly stable and predictable TER policy. 
+      <b>Mirae Asset ELSS Fund</b> also demonstrates a tightly grouped spread, reinforcing its reputation for low and consistent costs.
+      </p>
+    </li>
+
+    <li><b>Outliers and Irregularities:</b> 
+      <p>
+      Occasional outliers appear in <b>DSP</b> and <b>Axis</b> schemes, likely arising from temporary spikes in AUM or 
+      extraordinary operational costs. 
+      <b>HDFC</b> and <b>SBI</b>, though high in TER, display limited outliers—suggesting structurally embedded higher costs 
+      rather than erratic fee changes.
+      </p>
+    </li>
+
+    <li><b>Relative Positioning of Funds:</b> 
+      <p>
+      In the comparative landscape, <b>Mirae</b> and <b>Axis</b> occupy the lower-cost spectrum, 
+      appealing to cost-conscious investors. 
+      <b>HDFC</b> and <b>SBI</b> represent premium-priced schemes, where higher TERs may need to be justified through 
+      superior performance or alpha generation. 
+      <b>DSP</b> lies in the mid-range, reflecting moderate costs with some intermittent fluctuations.
+      </p>
+    </li>
+
+    <li><b>Investment Implications:</b> 
+      <p>
+      Funds with consistently low TERs, such as <b>Mirae Asset ELSS Fund</b>, are particularly suitable for long-term SIP investors, 
+      as lower expenses enhance compounding benefits over time. 
+      Conversely, high-cost schemes like <b>HDFC</b> or <b>SBI</b> should be justified only if they consistently deliver superior risk-adjusted returns. 
+      Under the three-year ELSS lock-in, expense ratios play a direct role in determining net investor outcomes, 
+      making <b>cost-effectiveness a key selection parameter</b> for long-term wealth creation.
+      </p>
+    </li>
+  </ol>
+
+</div>
+    """,
+    unsafe_allow_html=True
+)
