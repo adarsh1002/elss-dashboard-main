@@ -244,62 +244,60 @@ st.markdown(text_sharpe, unsafe_allow_html=True)
 # -------------------------
 # Sharpe Ratio section — reuse cached data & shared sidebar filters
 # -------------------------
+# -------------------------
+# Sharpe Ratio section (REUSES Standard Deviation filters; no new filters created)
+# -------------------------
 import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
 
-DATA_PATH = "data/Data_Obective2_final.xlsx"  # same file used for SD analysis
+DATA_PATH = "data/Data_Obective2_final.xlsx"
 
-# Cached loader (fast; runs only when file changes)
+# Cached loader
 @st.cache_data
 def _load_chapter2_data(path=DATA_PATH, sheet_name=0):
-    df = pd.read_excel(path, sheet_name=sheet_name)
+    raw = pd.read_excel(path, sheet_name=sheet_name)
+    if isinstance(raw, dict):
+        raw = list(raw.values())[0].copy()
+    df = raw.copy()
     df.columns = [c.strip() if isinstance(c, str) else c for c in df.columns]
-    # Ensure Date and Scheme Name columns exist
+
+    # detect columns
     if "Date" not in df.columns:
-        possible = [c for c in df.columns if isinstance(c, str) and "date" in c.lower()]
-        if possible:
-            df = df.rename(columns={possible[0]: "Date"})
-        else:
-            raise ValueError("No 'Date' column found in the chapter 2 data file.")
+        poss = [c for c in df.columns if isinstance(c, str) and "date" in c.lower()]
+        if poss:
+            df = df.rename(columns={poss[0]: "Date"})
     if "Scheme Name" not in df.columns:
-        possible = [c for c in df.columns if isinstance(c, str) and ("scheme" in c.lower() or "fund" in c.lower())]
-        if possible:
-            df = df.rename(columns={possible[0]: "Scheme Name"})
-        else:
-            raise ValueError("No 'Scheme Name' column found in the chapter 2 data file.")
-    # Detect Sharpe Ratio column (exact or fuzzy)
+        poss = [c for c in df.columns if isinstance(c, str) and ("scheme" in c.lower() or "fund" in c.lower())]
+        if poss:
+            df = df.rename(columns={poss[0]: "Scheme Name"})
+    # try detect sharpe column
     sharpe_col = None
     if "Sharpe Ratio" in df.columns:
         sharpe_col = "Sharpe Ratio"
     else:
-        candidates = [c for c in df.columns if isinstance(c, str) and "sharpe" in c.lower()]
-        if candidates:
-            sharpe_col = candidates[0]
-    if sharpe_col is None:
-        # If dataset doesn't have Sharpe, create empty column to avoid crash (will be handled later)
+        cand = [c for c in df.columns if isinstance(c, str) and "sharpe" in c.lower()]
+        if cand:
+            sharpe_col = cand[0]
+    if sharpe_col and sharpe_col != "Sharpe Ratio":
+        df = df.rename(columns={sharpe_col: "Sharpe Ratio"})
+    if "Sharpe Ratio" not in df.columns:
         df["Sharpe Ratio"] = np.nan
-    else:
-        # standardize column name
-        if sharpe_col != "Sharpe Ratio":
-            df = df.rename(columns={sharpe_col: "Sharpe Ratio"})
 
-    # Parse and clean
     df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
     df["Scheme Name"] = df["Scheme Name"].astype(str).str.strip()
     df["Sharpe Ratio"] = pd.to_numeric(df["Sharpe Ratio"], errors="coerce")
-    # derive year and drop invalid rows
     df["Year"] = df["Date"].dt.year
     df = df.dropna(subset=["Date", "Scheme Name"]).reset_index(drop=True)
     return df
 
-# Ensure data is loaded once into session state (so we don't repeatedly parse Excel)
+# load into session_state once
 if "chapter2_df" not in st.session_state:
     try:
         st.session_state["chapter2_df"] = _load_chapter2_data()
     except FileNotFoundError:
-        st.error(f"Chapter 2 data file not found: {DATA_PATH}. Please place it in data/ folder.")
+        st.error(f"Data file not found: {DATA_PATH}. Place it in data/ before running.")
         st.stop()
     except Exception as e:
         st.error(f"Error loading chapter 2 data: {e}")
@@ -307,93 +305,87 @@ if "chapter2_df" not in st.session_state:
 
 df_ch2 = st.session_state["chapter2_df"]
 
-# Sidebar filters: reuse existing shared controls if available
-st.sidebar.header("Chapter 2 Filters (Sharpe Ratio)")
+# REQUIRE: use the filters from Standard Deviation analysis
+# expected variables set by SD section: selected_schemes, selected_years, start_date, end_date
+missing = []
+if "selected_schemes" not in globals() and "selected_schemes" not in st.session_state:
+    missing.append("selected_schemes")
+if "selected_years" not in globals() and "selected_years" not in st.session_state:
+    missing.append("selected_years")
+if "start_date" not in globals() and "start_date" not in st.session_state:
+    missing.append("start_date")
+if "end_date" not in globals() and "end_date" not in st.session_state:
+    missing.append("end_date")
 
-# If global selected_schemes exists, reuse it, otherwise create a new multiselect
-if "selected_schemes" in globals() and isinstance(selected_schemes, (list, tuple)) and len(selected_schemes) > 0:
-    # ensure selected_schemes are valid for this dataset
-    valid_schemes = sorted(df_ch2["Scheme Name"].unique().tolist())
-    # intersect to avoid invalid names
-    reused = [s for s in selected_schemes if s in valid_schemes]
-    if reused:
-        selected_schemes_sharpe = st.sidebar.multiselect("Select Schemes", options=valid_schemes, default=reused)
-    else:
-        # fallback to all schemes if intersection empty
-        selected_schemes_sharpe = st.sidebar.multiselect("Select Schemes", options=valid_schemes, default=valid_schemes)
-else:
-    selected_schemes_sharpe = st.sidebar.multiselect(
-        "Select Schemes", options=sorted(df_ch2["Scheme Name"].unique()), default=sorted(df_ch2["Scheme Name"].unique())
+if missing:
+    st.error(
+        "Sharpe Ratio section requires filters defined by the Standard Deviation analysis. "
+        "Please run/apply the Standard Deviation filters first. Missing: " + ", ".join(missing)
     )
-
-# Date range filters: try to reuse start_date/end_date if present; else create new
-min_date = df_ch2["Date"].min().date()
-max_date = df_ch2["Date"].max().date()
-if "start_date" in globals() and "end_date" in globals():
-    # coerce globals into valid bounds
-    try:
-        sd_candidate = pd.to_datetime(start_date).date()
-        ed_candidate = pd.to_datetime(end_date).date()
-        sd = sd_candidate if sd_candidate >= min_date and sd_candidate <= max_date else min_date
-        ed = ed_candidate if ed_candidate >= min_date and ed_candidate <= max_date else max_date
-    except Exception:
-        sd, ed = min_date, max_date
-    # allow user to adjust but defaults to global values
-    start_date_sharpe = st.sidebar.date_input("Start date", value=sd, min_value=min_date, max_value=max_date)
-    end_date_sharpe = st.sidebar.date_input("End date", value=ed, min_value=min_date, max_value=max_date)
 else:
-    start_date_sharpe = st.sidebar.date_input("Start date", value=min_date, min_value=min_date, max_value=max_date)
-    end_date_sharpe = st.sidebar.date_input("End date", value=max_date, min_value=min_date, max_value=max_date)
-
-# Year filter (derived from Date) — show available years
-years_available = sorted(df_ch2["Year"].dropna().astype(int).unique().tolist())
-# default to years > 2019 as in your original code
-default_years = [y for y in years_available if y > 2019] or years_available
-selected_years_sharpe = st.sidebar.multiselect("Select Year(s)", options=years_available, default=default_years)
-
-# Now apply filters to df_ch2
-mask = df_ch2["Scheme Name"].isin(selected_schemes_sharpe)
-mask &= df_ch2["Date"].dt.date >= pd.to_datetime(start_date_sharpe).date()
-mask &= df_ch2["Date"].dt.date <= pd.to_datetime(end_date_sharpe).date()
-mask &= df_ch2["Year"].isin(selected_years_sharpe)
-df_sharpe_filtered = df_ch2.loc[mask].copy()
-
-if df_sharpe_filtered.empty:
-    st.info("No Sharpe Ratio data after applying selected filters. Adjust the filters.")
-else:
-    # Compute yearly mean Sharpe Ratio per scheme
-    avg_sharpe = (
-        df_sharpe_filtered.groupby(["Year", "Scheme Name"], as_index=False)["Sharpe Ratio"]
-        .mean()
-        .sort_values(["Scheme Name", "Year"])
-    )
-
-    # Defensive: if Sharpe Ratio column is all NaN, notify
-    if avg_sharpe["Sharpe Ratio"].isna().all():
-        st.warning("Sharpe Ratio column is empty or non-numeric in the dataset. Please check the source file.")
+    # Prefer globals first, then session_state
+    if "selected_schemes" in globals():
+        schemes_filter = selected_schemes
     else:
-        # Plot interactive Plotly line chart
-        fig = px.line(
-            avg_sharpe,
-            x="Year",
-            y="Sharpe Ratio",
-            color="Scheme Name",
-            markers=True,
-            template="plotly_white",
-            title="Year-wise Average Sharpe Ratio of ELSS Schemes",
-            labels={"Sharpe Ratio": "Sharpe Ratio (Risk-Adjusted Return)", "Year": "Year"}
+        schemes_filter = st.session_state["selected_schemes"]
+
+    if "selected_years" in globals():
+        years_filter = selected_years
+    else:
+        years_filter = st.session_state["selected_years"]
+
+    if "start_date" in globals():
+        sd = pd.to_datetime(start_date).date()
+    else:
+        sd = pd.to_datetime(st.session_state["start_date"]).date()
+    if "end_date" in globals():
+        ed = pd.to_datetime(end_date).date()
+    else:
+        ed = pd.to_datetime(st.session_state["end_date"]).date()
+
+    # Apply filters to the chapter2 dataframe
+    mask = df_ch2["Scheme Name"].isin(schemes_filter)
+    mask &= df_ch2["Date"].dt.date >= sd
+    mask &= df_ch2["Date"].dt.date <= ed
+    # If selected_years is a list of ints/strings, ensure dtype matches
+    years_filter_int = [int(y) for y in years_filter]
+    mask &= df_ch2["Year"].isin(years_filter_int)
+
+    df_sharpe_filtered = df_ch2.loc[mask].copy()
+
+    if df_sharpe_filtered.empty:
+        st.info("No Sharpe Ratio data after applying the Standard Deviation filters. Consider broadening the SD filters.")
+    else:
+        # compute yearly mean sharpe per scheme
+        avg_sharpe = (
+            df_sharpe_filtered.groupby(["Year", "Scheme Name"], as_index=False)["Sharpe Ratio"]
+            .mean()
+            .sort_values(["Scheme Name", "Year"])
         )
 
-        fig.update_traces(line=dict(width=3), marker=dict(size=7))
-        fig.update_layout(
-            hovermode="x unified",
-            legend=dict(title="Scheme Name", orientation="v", yanchor="top", y=0.98, xanchor="left", x=1.02),
-            margin=dict(t=80, b=80, l=60, r=220),
-            height=580,
-            font=dict(size=13)
-        )
+        if avg_sharpe["Sharpe Ratio"].isna().all():
+            st.warning("Sharpe Ratio column appears empty/non-numeric after filtering. Check source file.")
+        else:
+            # Plot
+            fig = px.line(
+                avg_sharpe,
+                x="Year",
+                y="Sharpe Ratio",
+                color="Scheme Name",
+                markers=True,
+                template="plotly_white",
+                title="Year-wise Average Sharpe Ratio (Using SD filters)"
+            )
+            fig.update_traces(line=dict(width=3), marker=dict(size=7))
+            fig.update_layout(
+                hovermode="x unified",
+                legend=dict(title="Scheme", orientation="v", x=1.02, y=1),
+                margin=dict(t=90, b=80, l=60, r=220),
+                height=600,
+                font=dict(size=13)
+            )
 
-        st.subheader("Sharpe Ratio — Yearly Average (2020–2024)")
-        st.plotly_chart(fig, use_container_width=True)
+            st.subheader("Sharpe Ratio — Yearly Average (reusing SD filters)")
+            st.plotly_chart(fig, use_container_width=True)
 
-     
+            
