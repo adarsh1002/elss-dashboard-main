@@ -371,3 +371,159 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+# Objective 3 — Interactive Cost Efficiency Bubble Chart (Plotly + Streamlit)
+import streamlit as st
+import pandas as pd
+import numpy as np
+import plotly.express as px
+import plotly.graph_objects as go
+
+
+DATA_PATH = "data/Objective_3_Data.xlsx"  # update path if needed
+SHEET_NAME = "Sheet1"
+
+@st.cache_data
+def load_data(path=DATA_PATH, sheet_name=SHEET_NAME):
+    xls = pd.ExcelFile(path)
+    df = xls.parse(sheet_name)
+    # strip column names
+    df.columns = [c.strip() if isinstance(c, str) else c for c in df.columns]
+    return df
+
+# Load
+try:
+    df = load_data()
+except FileNotFoundError:
+    st.error(f"File not found: {DATA_PATH}. Put the file in data/ or change DATA_PATH.")
+    st.stop()
+except Exception as e:
+    st.error(f"Error loading file: {e}")
+    st.stop()
+
+# Ensure required columns exist (attempt to detect variants)
+col_map = {}
+for needed in ["Scheme Name", "Sharpe Ratio", "Expense Ratio", "Return 3 Year"]:
+    if needed in df.columns:
+        col_map[needed] = needed
+    else:
+        # fuzzy detection
+        cand = [c for c in df.columns if needed.split()[0].lower() in c.lower()]
+        col_map[needed] = cand[0] if cand else None
+
+missing = [k for k, v in col_map.items() if v is None]
+if missing:
+    st.error(f"Missing required columns in the file: {missing}. Columns found: {df.columns.tolist()}")
+    st.stop()
+
+# Rename columns to canonical names
+df = df.rename(columns={col_map["Scheme Name"]: "Scheme Name",
+                        col_map["Sharpe Ratio"]: "Sharpe Ratio",
+                        col_map["Expense Ratio"]: "Expense Ratio",
+                        col_map["Return 3 Year"]: "Return 3 Year"})
+
+# Coerce numeric
+df["Sharpe Ratio"] = pd.to_numeric(df["Sharpe Ratio"], errors="coerce")
+df["Expense Ratio"] = pd.to_numeric(df["Expense Ratio"], errors="coerce")
+df["Return 3 Year"] = pd.to_numeric(df["Return 3 Year"], errors="coerce")
+
+# Optionally let user filter schemes (sidebar)
+st.sidebar.header("Controls")
+all_schemes = sorted(df["Scheme Name"].dropna().unique().tolist())
+selected_schemes = st.sidebar.multiselect("Select scheme(s) to include", options=all_schemes, default=all_schemes)
+
+# Optionally let user choose aggregation (median/mean for returns)
+agg_return_choice = st.sidebar.selectbox("Aggregate 3-Year Return by", options=["median", "mean"], index=0)
+agg_expense_choice = st.sidebar.selectbox("Aggregate Expense Ratio by", options=["median", "mean"], index=0)
+agg_sharpe_choice = st.sidebar.selectbox("Aggregate Sharpe Ratio by", options=["mean", "median"], index=0)
+
+# Filter
+plot_df = df[df["Scheme Name"].isin(selected_schemes)].copy()
+if plot_df.empty:
+    st.info("No data after filtering. Select at least one scheme.")
+    st.stop()
+
+# Aggregate
+agg_funcs = {
+    "Expense Ratio": (agg_expense_choice),
+    "Return 3 Year": (agg_return_choice),
+    "Sharpe Ratio": (agg_sharpe_choice)
+}
+
+# build agg mapping for pandas
+agg_map = {
+    "Expense Ratio": agg_funcs["Expense Ratio"],
+    "Return 3 Year": agg_funcs["Return 3 Year"],
+    "Sharpe Ratio": agg_funcs["Sharpe Ratio"]
+}
+
+bubble_df = (
+    plot_df
+    .groupby("Scheme Name", as_index=False)
+    .agg(agg_map)
+    .rename(columns={
+        "Expense Ratio": "Median Expense Ratio" if agg_expense_choice == "median" else "Avg Expense Ratio",
+        "Return 3 Year": "Median 3-Year Return" if agg_return_choice == "median" else "Avg 3-Year Return",
+        "Sharpe Ratio": "Avg Sharpe Ratio" if agg_sharpe_choice == "mean" else "Median Sharpe Ratio"
+    })
+)
+
+# Standardize column names for plotting
+expense_col = [c for c in bubble_df.columns if "Expense" in c][0]
+return_col = [c for c in bubble_df.columns if "3-Year" in c or "3 Year" in c][0]
+sharpe_col = [c for c in bubble_df.columns if "Sharpe" in c][0]
+
+# Drop NA rows
+bubble_df = bubble_df.dropna(subset=[expense_col, return_col, sharpe_col]).reset_index(drop=True)
+if bubble_df.empty:
+    st.info("No aggregated numeric rows to plot after cleaning.")
+    st.stop()
+
+# Normalize marker sizes for Plotly
+# size is based on sharpe_col; scale to reasonable marker size range
+size_vals = bubble_df[sharpe_col].astype(float).fillna(0)
+# avoid negative/zero sizes causing issues: shift if necessary
+min_size, max_size = 8, 60
+if size_vals.max() == size_vals.min():
+    marker_sizes = np.clip((size_vals - size_vals.min()) + (max_size+min_size)/2, min_size, max_size)
+else:
+    marker_sizes = ((size_vals - size_vals.min()) / (size_vals.max() - size_vals.min())) * (max_size - min_size) + min_size
+
+# Create interactive Plotly scatter (bubble) chart
+fig = px.scatter(
+    bubble_df,
+    x=expense_col,
+    y=return_col,
+    size=marker_sizes,            # pass computed sizes (Plotly will scale again, but OK)
+    size_max=max_size,
+    color="Scheme Name",
+    hover_name="Scheme Name",
+    hover_data={expense_col: ':.3f', return_col: ':.3f', sharpe_col: ':.3f'},
+    labels={expense_col: "Median Expense Ratio (%)", return_col: "Median 3-Year Return (%)"},
+    template="plotly_white",
+    title="Cost Efficiency: Median 3-Year Return vs Median Expense Ratio"
+)
+
+# Add text labels (scheme + Sharpe) positioned to the right
+for i, row in bubble_df.iterrows():
+    fig.add_annotation(
+        x=float(row[expense_col]),
+        y=float(row[return_col]),
+        text=f"{row['Scheme Name']}<br>Sharpe: {row[sharpe_col]:.2f}",
+        showarrow=False,
+        xanchor="left",
+        yanchor="middle",
+        font=dict(size=11),
+        opacity=0.9
+    )
+
+# Layout tweaks
+fig.update_traces(marker=dict(line=dict(width=1, color="DarkSlateGrey")), selector=dict(mode='markers'))
+fig.update_layout(
+    legend_title_text="Scheme",
+    height=640,
+    margin=dict(l=80, r=300, t=80, b=80)
+)
+
+# Display
+st.plotly_chart(fig, use_container_width=True)
+
