@@ -677,14 +677,18 @@ for f in funds_to_plot:
 
 # ---- Sectoral Trend Analysis: Dynamic Fund-wise Observations ----
 
-def sectoral_trend_analysis_summary(selected_funds):
+# ---- Robust Dynamic Sectoral Trend Summaries ----
+import streamlit as st
+
+def sectoral_trend_analysis_summary(selected_funds, all_funds_list):
     """
-    Displays a summary analysis depending on selected fund(s):
-    - If all funds are selected, shows complete comparative summary.
-    - If one fund is selected, shows its individual narrative.
+    Displays fund-wise or combined sectoral trend summaries based on selections.
+    - If exactly 1 fund selected => show that fund's detailed summary.
+    - If selection equals all available funds => show the combined comparative summary.
+    - If multiple (but not all) selected => show summaries for each selected fund (in order).
     """
 
-    # Multi-fund (all) summary
+    # Combined summary when all funds are selected
     all_funds_summary = """
     <div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
     <h4>Summary Findings: Sectoral Trend Analysis (2020–2024)</h4>
@@ -707,33 +711,27 @@ def sectoral_trend_analysis_summary(selected_funds):
       and increasing stakes in IT and Pharma. This diversification supported a robust <b>CAGR of 22.19%</b> 
       and <b>Sharpe Ratio of 1.10</b>, showcasing timely tactical shifts aligned with market opportunities.</li>
 
-    <li><b>Mirae Asset ELSS:</b> Maintained steady focus on Banking (23–28%) and IT (8–13%) while adding exposure 
-      to Petroleum and Automobiles post-2022, benefiting from reopening-led growth. The fund achieved a strong 
-      <b>CAGR of 21.10%</b> and <b>Sharpe Ratio of 0.82</b>, though cyclical volatility slightly constrained risk efficiency.</li>
+    <li><b>Mirae Asset ELSS:</b> Maintained consistent Banking (23–28%) and IT (8–13%) exposure while taking tactical positions
+      in Petroleum and Automobiles post-2022, capturing reopening-led gains. It achieved a <b>CAGR of 21.10%</b> 
+      and <b>Sharpe Ratio of 0.82</b> with moderate volatility from cyclical bets.</li>
 
-    <li><b>HDFC ELSS:</b> Pursued a high-conviction, large-cap concentrated strategy anchored in Banks and IT. 
-      Banking exposure rose sharply (25% → 60%), complemented by Software and Pharma allocations.
-      This focus delivered consistent, superior performance with a <b>CAGR of 21.80%</b> 
-      and <b>Sharpe Ratio of 1.21</b>.</li>
+    <li><b>HDFC ELSS:</b> Pursued a high-conviction, large-cap concentrated strategy anchored in Banking and IT, 
+      raising bank exposure significantly and delivering a <b>CAGR of 21.80%</b> and <b>Sharpe Ratio of 1.21</b>.</li>
 
-    <li><b>SBI ELSS:</b> Maintained the most balanced and diversified portfolio across Financials, IT, and Pharma, 
-      avoiding overconcentration. With a <b>CAGR of 24.50%</b> and <b>Sharpe Ratio of 1.22</b>, 
-      it emerged as the best performer in both return and risk-adjusted terms.</li>
+    <li><b>SBI ELSS:</b> Maintained a balanced and diversified allocation, driving the highest performance among peers
+      with <b>CAGR of 24.50%</b> and <b>Sharpe Ratio of 1.22</b>, reflecting superior sector rotation and risk management.</li>
     </ul>
 
     <p>
-    Overall, the analysis highlights how <b>active sector rotation</b> and <b>balanced exposure</b> 
-    to Financials, Technology, and Consumer sectors enhanced performance consistency. 
-    <b>HDFC</b> and <b>SBI ELSS</b> achieved superior risk-adjusted efficiency through disciplined large-cap allocation 
-    and selective participation in growth sectors, while <b>Axis ELSS</b> remained conservative, trading lower risk for lower returns.
-    Funds like <b>DSP</b> and <b>Mirae Asset</b> leveraged tactical diversification to outperform during market recovery phases.
+    Overall, active sector rotation into Financials, Technology, and select cyclical sectors supported stronger
+    risk-adjusted returns across the sample, while conservative allocations limited upside during the recovery phase.
     </p>
     </div>
     """
 
-    # Individual fund summaries
+    # Per-fund summaries keyed by canonical identifiers (keys are lower-case short names to ease matching)
     fund_summaries = {
-        "Axis ELSS": """
+        "Axis": """
         <div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
         <h4>Axis ELSS — Sectoral Trend Insights (2020–2024)</h4>
         <p>
@@ -745,7 +743,7 @@ def sectoral_trend_analysis_summary(selected_funds):
         </p>
         </div>
         """,
-        "DSP ELSS": """
+        "DSP": """
         <div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
         <h4>DSP ELSS — Sectoral Trend Insights (2020–2024)</h4>
         <p>
@@ -757,7 +755,7 @@ def sectoral_trend_analysis_summary(selected_funds):
         </p>
         </div>
         """,
-        "Mirae Asset ELSS": """
+        "Mirae Asset": """
         <div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
         <h4>Mirae Asset ELSS — Sectoral Trend Insights (2020–2024)</h4>
         <p>
@@ -768,7 +766,7 @@ def sectoral_trend_analysis_summary(selected_funds):
         </p>
         </div>
         """,
-        "HDFC ELSS": """
+        "HDFC": """
         <div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
         <h4>HDFC ELSS — Sectoral Trend Insights (2020–2024)</h4>
         <p>
@@ -780,13 +778,13 @@ def sectoral_trend_analysis_summary(selected_funds):
         </p>
         </div>
         """,
-        "SBI ELSS": """
+        "SBI": """
         <div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
         <h4>SBI ELSS — Sectoral Trend Insights (2020–2024)</h4>
         <p>
         SBI ELSS maintained a <b>balanced and diversified portfolio</b> across all key sectors.
         Banking exposure (15–18%) remained moderate, while Software steadily increased, reflecting
-        a shift toward technology-led growth. Pharma peaked in 2021 as a defensive buffer and later stabilized,
+        a shift toward technology-led growth. Pharma exposure peaked in 2021 as a defensive buffer and later stabilized,
         while cyclical sectors like Petroleum and Finance were trimmed. 
         The fund achieved the <b>highest CAGR (24.50%)</b> and <b>Sharpe Ratio (1.22)</b>, 
         signifying outstanding risk-adjusted performance driven by effective sector rotation 
@@ -796,19 +794,75 @@ def sectoral_trend_analysis_summary(selected_funds):
         """
     }
 
+    # helper to match a selected fund name to a canonical key
+    def match_fund_key(fund_name):
+        fn = fund_name.lower()
+        # common checks for substring matching
+        if "axis" in fn:
+            return "axis"
+        if "dsp" in fn:
+            return "dsp"
+        if "mirae" in fn:
+            return "mirae"
+        if "hdfc" in fn:
+            return "hdfc"
+        if "sbi" in fn:
+            return "sbi"
+        # fallback: try exact startswith matches
+        for k in fund_summaries.keys():
+            if k in fn:
+                return k
+        return None
+
     # Display logic
-    if len(selected_funds) == 1:
-        fund_name = selected_funds[0]
-        if fund_name in fund_summaries:
-            st.markdown(fund_summaries[fund_name], unsafe_allow_html=True)
+    # Normalize lists
+    sel = selected_funds or []
+    all_list = all_funds_list or []
+
+    # Case 1: exactly one selected -> show that fund summary (if matched)
+    if len(sel) == 1:
+        key = match_fund_key(sel[0])
+        if key and key in fund_summaries:
+            with st.expander(f"Sectoral Trend Insights — {sel[0]}", expanded=True):
+                st.markdown(fund_summaries[key], unsafe_allow_html=True)
+            return
         else:
-            st.info("No fund-specific summary available.")
-    else:
-        st.markdown(all_funds_summary, unsafe_allow_html=True)
+            st.info("Detailed summary for the selected fund is not available.")
+            return
 
+    # Case 2: selection matches all funds -> show combined comparative summary
+    if set(map(str.lower, sel)) == set(map(str.lower, all_list)):
+        with st.expander("Comparative Sectoral Trend Summary — All Funds", expanded=True):
+            st.markdown(all_funds_summary, unsafe_allow_html=True)
+        return
 
-# ---- Example usage ----
-# Call this after your sectoral trend chart section
-# Example: sectoral_trend_analysis_summary(selected_funds)
+    # Case 3: multiple but not all selected -> show per-selected-fund summaries
+    if len(sel) > 1:
+        with st.expander("Sectoral Trend Insights — Selected Funds", expanded=True):
+            shown_any = False
+            for fund in sel:
+                key = match_fund_key(fund)
+                if key and key in fund_summaries:
+                    st.markdown(f"<h5 style='margin-bottom:6px'>{fund}</h5>", unsafe_allow_html=True)
+                    st.markdown(fund_summaries[key], unsafe_allow_html=True)
+                    shown_any = True
+                else:
+                    st.markdown(f"<p><b>{fund}:</b> No summary available.</p>", unsafe_allow_html=True)
+            if not shown_any:
+                st.info("No detailed summaries matched the selected funds.")
+        return
 
-sectoral_trend_analysis_summary(selected_funds)
+    # Default fallback
+    st.markdown(all_funds_summary, unsafe_allow_html=True)
+
+all_funds = sorted(df[fund_col].unique().tolist())
+selected_funds = st.sidebar.multiselect("Select Fund Houses", options=all_funds, default=all_funds)
+
+# later, call:
+sectoral_trend_analysis_summary(selected_funds, all_funds)
+# -------------------------
+# Usage example — call this with your sidebar-selected funds and full fund list
+# selected_funds (from sidebar multiselect) and all_funds_list (the complete list of funds)
+# e.g. sectoral_trend_analysis_summary(selected_funds, all_funds)
+# -------------------------
+st.write(selected_funds)
