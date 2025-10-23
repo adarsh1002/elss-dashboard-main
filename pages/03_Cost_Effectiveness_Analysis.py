@@ -254,7 +254,7 @@ st.markdown(
     """
 <div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
 
-  <h4>Interpretation/h4>
+  <h4>Interpretation</h4>
 
   <p>
   Each box in the visualization represents the <b>interquartile range (IQR)</b>, 
@@ -266,25 +266,15 @@ st.markdown(
 
   <h5>Key Highlights</h5>
 
-  <ol>
-    <li><b>Central Tendencies (Mean & Median):</b> 
-      <p>
-      <b>HDFC ELSS Tax Saver Fund</b> records the highest average TER (1.22%) and median (1.23%), 
-      signifying a consistently higher cost structure. 
-      <b>Mirae Asset ELSS Fund</b> displays the lowest average TER (0.51%) and median (0.55%), 
-      making it the most cost-efficient among the compared schemes. 
-      For <b>Axis</b>, <b>DSP</b>, and <b>HDFC</b>, the proximity between mean and median suggests symmetrical distributions, 
-      indicating an absence of major skewness in their expense data.
-      </p>
-    </li>
+<ol>
+<li><b>Central Tendencies (Mean & Median):</b> 
+<p><b>HDFC ELSS Tax Saver Fund</b> records the highest average TER (1.22%) and median (1.23%),signifying a consistently higher cost structure. <b>Mirae Asset ELSS Fund</b> displays the lowest average TER (0.51%) and median (0.55%), 
+      making it the most cost-efficient among the compared schemes. For <b>Axis</b>, <b>DSP</b>, and <b>HDFC</b>, the proximity between mean and median suggests symmetrical distributions, indicating an absence of major skewness in their expense data.
+</p></li>
 
-    <li><b>Dispersion and Variability:</b> 
-      <p>
-      <b>SBI Long Term Equity Fund</b> exhibits the widest IQR, implying higher variability in its monthly expense ratios. 
-      <b>Axis ELSS Tax Saver Fund</b> has the narrowest box, showing a highly stable and predictable TER policy. 
-      <b>Mirae Asset ELSS Fund</b> also demonstrates a tightly grouped spread, reinforcing its reputation for low and consistent costs.
-      </p>
-    </li>
+<li><b>Dispersion and Variability:</b> 
+<p><b>SBI Long Term Equity Fund</b> exhibits the widest IQR, implying higher variability in its monthly expense ratios.<b>Axis ELSS Tax Saver Fund</b> has the narrowest box, showing a highly stable and predictable TER policy. <b>Mirae Asset ELSS Fund</b> also demonstrates a tightly grouped spread, reinforcing its reputation for low and consistent costs.
+</p></li>
 
     <li><b>Outliers and Irregularities:</b> 
       <p>
