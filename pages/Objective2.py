@@ -374,7 +374,7 @@ else:
                 color="Scheme Name",
                 markers=True,
                 template="plotly_white",
-                title="Year-wise Average Sharpe Ratio (reusing SD years & schemes)"
+                title="Year-wise Average Sharpe Ratio of Selected ELSS Schemes",
             )
             fig.update_traces(line=dict(width=3), marker=dict(size=7))
             fig.update_layout(
@@ -385,7 +385,6 @@ else:
                 font=dict(size=13)
             )
 
-            st.subheader("Sharpe Ratio — Yearly Average (using SD filters)")
             st.plotly_chart(fig, use_container_width=True)
 
            
