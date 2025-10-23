@@ -481,13 +481,12 @@ period_map = dict(zip(period_labels, periods))
 label_map = {v: k for k, v in period_map.items()}
 
 # ---------- SIDEBAR CONTROLS ----------
-st.sidebar.header("Controls")
+st.sidebar.header("Controls for Sectoral Allocation Analysis")
 
 
 # Top-N sectors for grouped bar
 top_n = st.sidebar.number_input("Top N sectors (grouped bar)", min_value=3, max_value=20, value=8, step=1)
-# Top-K per fund for pie
-top_k = st.sidebar.number_input("Top K sectors per fund (pie)", min_value=3, max_value=12, value=5, step=1)
+
 # Trend top M
 trend_m = st.sidebar.number_input("Top M sectors for trends", min_value=3, max_value=20, value=6, step=1)
 
@@ -539,52 +538,109 @@ st.markdown("### Underlying pivot (selected month)")
 pivot_display = pivot.reset_index().rename(columns={industry_col: "Sector"})
 st.dataframe(pivot_display.style.format({c: "{:.2f}%" for c in pivot_display.columns if c != "Sector"}))
 
-@st.cache_data
-def to_csv_bytes(df_):
-    return df_.to_csv(index=False).encode("utf-8")
+st.markdown(
+    """
+<div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
 
-st.download_button("Download pivot CSV", data=to_csv_bytes(pivot_display),
-                   file_name=f"sector_pivot_{selected_date.strftime('%Y_%m')}.csv",
-                   mime="text/csv")
+  <h4>Analysis Summary: Sectoral Allocation Overview (Grouped Bar Chart)</h4>
 
-# ---------- 2) Pie (donut) charts: top-K sectors per fund ----------
-st.subheader(f"Top {top_k} Sectors per Fund — {selected_date.strftime('%b %Y')}")
-funds_for_pie = selected_funds if selected_funds else all_funds
-n_funds = len(funds_for_pie)
-cols = st.columns(2)
+  <p>
+  The sectoral allocation comparison highlights how each <b>ELSS fund</b> strategically positions its investments 
+  across key sectors of the Indian economy, reflecting both <b>macro-economic confidence</b> and 
+  <b>fund-specific risk orientations</b>. 
+  Financial Services and Information Technology form the backbone of all five portfolios, 
+  supported by selective exposure to cyclical and defensive sectors such as Automobiles, Pharmaceuticals, and Consumer Durables.
+  </p>
 
-# Prepare subplot for pies (use rows = ceil(n_funds/2))
-rows = ceil(n_funds / 2)
-fig_pies = make_subplots(rows=rows, cols=2, specs=[[{"type": "domain"}, {"type": "domain"}]] * rows,
-                         subplot_titles=funds_for_pie)
+<ul>
+<li><b>Dominance of Financial Sector (Banks and Finance):</b> 
+    The <b>Banking and Financial Services</b> sector dominates across all funds, reaffirming its central role in India’s equity markets. 
+    <b>HDFC ELSS</b> has the highest allocation to Banks (≈ 35%), followed by <b>DSP</b> (26%) and <b>Mirae Asset</b> (24%), 
+    underscoring conviction in India’s credit expansion and formalization of finance. 
+    NBFCs and diversified financial companies also hold notable weights, especially in Axis and HDFC funds, 
+    reflecting optimism toward India’s lending ecosystem and financial inclusion drive.</li>
+<li><b>Technology and IT Exposure:</b> 
+    All funds maintain steady exposure (7–10%) to <b>Software and IT Services</b>, demonstrating confidence in the sector’s 
+    export resilience, earnings visibility, and participation in the digital transformation trend. 
+    <b>HDFC ELSS</b> leads with approximately 10% allocation, reinforcing its <b>growth-oriented strategy</b>.</li>
 
-r = c = 1
-for i, f in enumerate(funds_for_pie):
-    subset = df_month[df_month[fund_col] == f].copy()
-    if subset.empty:
-        labels = ["No data"]
-        sizes = [100]
-    else:
-        topk = subset.sort_values(contrib_col, ascending=False).head(top_k).copy()
-        labels = topk[industry_col].tolist()
-        sizes = topk[contrib_col].tolist()
-        others = max(0, 100 - sum(sizes))
-        if others > 0:
-            labels.append("Others")
-            sizes.append(others)
-    # compute row,col position
-    row = (i // 2) + 1
-    col = (i % 2) + 1
-    fig_pies.add_trace(go.Pie(labels=labels, values=sizes, hole=.4, textinfo='percent+label',
-                              hovertemplate="%{label}: %{value:.2f}%<extra></extra>"),
-                       row=row, col=col)
+<li><b>Pharmaceuticals and Healthcare:</b> 
+    The <b>Pharma and Healthcare</b> sector contributes 6–8% to most portfolios, particularly in <b>DSP</b> and <b>HDFC</b>. 
+    This sustained allocation indicates confidence in healthcare as a <b>defensive sector</b> offering stability amid volatility.</li>
 
-fig_pies.update_layout(title_text=f"Top {top_k} Sectors (per Fund) — {selected_period.strftime('%b %Y')}",
-                       height=250 * rows, showlegend=False, template="plotly_white")
-st.plotly_chart(fig_pies, use_container_width=True)
+<li><b>Cyclical and Consumer-Oriented Sectors:</b> 
+    Exposure to <b>Automobiles</b> and <b>Consumer Durables</b> highlights participation in India’s consumption-driven growth story. 
+    <b>Mirae Asset</b> and <b>Axis ELSS</b> show relatively higher allocations to Automobiles, suggesting optimism toward domestic demand recovery. 
+    Insurance exposures (2–6%) across funds further indicate a long-term structural focus on financial protection and household savings.</li>
+
+<li><b>Sector Diversification:</b> 
+    All funds maintain exposure across at least six to eight sectors, ensuring <b>diversification</b> and risk mitigation. 
+    <b>SBI ELSS</b> emerges as the most balanced, avoiding concentration risk, whereas <b>HDFC</b> and <b>DSP</b> exhibit a stronger tilt toward Financials and IT.</li>
+</ul>
+
+  <p>
+  Collectively, the analysis reveals that <b>Financial Services</b> and <b>Information Technology</b> serve as 
+  the <b>core pillars</b> of ELSS portfolios — sectors that offer high liquidity, earnings visibility, and 
+  long-term structural growth potential. 
+  <b>HDFC ELSS</b> demonstrates a concentrated and growth-driven approach dominated by Banks and Software, 
+  while <b>DSP</b> and <b>Mirae Asset</b> adopt moderately aggressive positioning through higher exposure to cyclical sectors. 
+  <b>Axis ELSS</b> maintains a more defensive balance across Pharma, IT, and FMCG, ensuring stability in volatile markets, 
+  whereas <b>SBI ELSS</b> presents the <b>most diversified portfolio</b> with balanced exposure across Financials, IT, Automobiles, and Insurance.
+  </p>
+
+  <p>
+  The consistent exposure to <b>Pharmaceuticals</b> and <b>IT</b> across all funds underscores 
+  fund managers’ preference for resilient sectors with <b>steady cash flows and global competitiveness</b>. 
+  Meanwhile, overweight allocations to <b>Financials</b> and <b>consumption-linked sectors</b> 
+  reflect optimism regarding India’s structural growth trajectory. 
+  This sectoral analysis confirms that while all ELSS funds anchor their portfolios in stability-driven large-cap sectors, 
+  their differing secondary exposures — such as Automobiles, Consumer Durables, and Pharma — 
+  illustrate distinct <b>investment philosophies, risk appetites,</b> and <b>strategic themes</b> shaping performance outcomes.
+  </p>
+
+</div>
+    """,
+    unsafe_allow_html=True
+)
+
+
 
 # ---------- 3) Sectoral Trends for Top M sectors across time (per fund) ----------
 st.subheader(f"Sectoral Trends — Top {trend_m} Sectors Across Time")
+st.markdown(
+    """
+<div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
+
+
+  <p>
+  The sectoral trend analysis tracks the evolution of investments across key industries — 
+  <b>Banking</b>, <b>Finance</b>, <b>Information Technology (Software)</b>, 
+  <b>Pharmaceuticals & Biotechnology</b>, <b>Consumer Non-Durables</b>, 
+  and <b>Petroleum Products</b> — for the five selected ELSS funds 
+  over the period <b>March 2020 to September 2024</b>. 
+  </p>
+
+  <p>
+  The patterns highlight how fund managers dynamically rebalanced their portfolios in response to 
+  <b>post-pandemic market volatility</b>, <b>inflationary pressures</b>, and the 
+  <b>economic recovery cycle</b> during 2022–2024. 
+  Shifts in sectoral weights reflect tactical adjustments aimed at capturing emerging opportunities 
+  while mitigating cyclical risks. 
+  </p>
+
+  <p>
+  The analysis further connects these sectoral adjustments with 
+  each fund’s <b>CAGR (2020–2024)</b> and <b>Sharpe Ratio</b>, 
+  illustrating how <b>sectoral allocation efficiency</b> contributed to overall performance outcomes. 
+  Funds that maintained timely rotations into <b>Financials</b>, <b>Technology</b>, 
+  and <b>Consumer-driven sectors</b> achieved stronger risk-adjusted returns, 
+  underscoring the importance of <b>active sector management</b> in enhancing ELSS performance.
+  </p>
+
+</div>
+    """,
+    unsafe_allow_html=True
+)
 # Determine top M sectors by average allocation across full sample (or restrict to selected funds)
 if selected_funds:
     base_for_trend = df[df[fund_col].isin(selected_funds)]
@@ -619,5 +675,140 @@ for f in funds_to_plot:
     fig_tr.update_xaxes(tickformat="%b %Y", tickangle=45)
     st.plotly_chart(fig_tr, use_container_width=True)
 
-st.markdown("---")
-st.caption("Tip: use the sidebar to change month, Top N/K/M values and filter funds. Charts are interactive — hover to inspect exact values.")
+# ---- Sectoral Trend Analysis: Dynamic Fund-wise Observations ----
+
+def sectoral_trend_analysis_summary(selected_funds):
+    """
+    Displays a summary analysis depending on selected fund(s):
+    - If all funds are selected, shows complete comparative summary.
+    - If one fund is selected, shows its individual narrative.
+    """
+
+    # Multi-fund (all) summary
+    all_funds_summary = """
+    <div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
+    <h4>Summary Findings: Sectoral Trend Analysis (2020–2024)</h4>
+    <p>
+    The sectoral trend analysis reveals how the five selected <b>ELSS funds</b> dynamically adjusted
+    their portfolio exposures across major industries — <b>Banking</b>, <b>Finance</b>, 
+    <b>Information Technology</b>, <b>Pharmaceuticals</b>, <b>Consumer Non-Durables</b>, 
+    and <b>Petroleum Products</b> — from <b>March 2020 to September 2024</b>. 
+    These shifts reflect each fund house’s distinct investment philosophy, tactical response to market cycles,
+    and risk-return balance during post-pandemic recovery and subsequent expansion phases.
+    </p>
+
+    <ul>
+    <li><b>Axis ELSS:</b> Followed a stable, quality-focused strategy with moderate sectoral diversification. 
+      Exposure to Software and Finance remained steady (~8–10%), while Banking declined post-2020 before modest recovery in 2024. 
+      Its defensive allocation yielded low volatility but limited upside potential, reflected in a <b>CAGR of 14.05%</b> 
+      and <b>Sharpe Ratio of 0.28</b>.</li>
+
+    <li><b>DSP ELSS:</b> Demonstrated dynamic reallocation, cutting Bank exposure from ~55% (2020) to ~25% (2024) 
+      and increasing stakes in IT and Pharma. This diversification supported a robust <b>CAGR of 22.19%</b> 
+      and <b>Sharpe Ratio of 1.10</b>, showcasing timely tactical shifts aligned with market opportunities.</li>
+
+    <li><b>Mirae Asset ELSS:</b> Maintained steady focus on Banking (23–28%) and IT (8–13%) while adding exposure 
+      to Petroleum and Automobiles post-2022, benefiting from reopening-led growth. The fund achieved a strong 
+      <b>CAGR of 21.10%</b> and <b>Sharpe Ratio of 0.82</b>, though cyclical volatility slightly constrained risk efficiency.</li>
+
+    <li><b>HDFC ELSS:</b> Pursued a high-conviction, large-cap concentrated strategy anchored in Banks and IT. 
+      Banking exposure rose sharply (25% → 60%), complemented by Software and Pharma allocations.
+      This focus delivered consistent, superior performance with a <b>CAGR of 21.80%</b> 
+      and <b>Sharpe Ratio of 1.21</b>.</li>
+
+    <li><b>SBI ELSS:</b> Maintained the most balanced and diversified portfolio across Financials, IT, and Pharma, 
+      avoiding overconcentration. With a <b>CAGR of 24.50%</b> and <b>Sharpe Ratio of 1.22</b>, 
+      it emerged as the best performer in both return and risk-adjusted terms.</li>
+    </ul>
+
+    <p>
+    Overall, the analysis highlights how <b>active sector rotation</b> and <b>balanced exposure</b> 
+    to Financials, Technology, and Consumer sectors enhanced performance consistency. 
+    <b>HDFC</b> and <b>SBI ELSS</b> achieved superior risk-adjusted efficiency through disciplined large-cap allocation 
+    and selective participation in growth sectors, while <b>Axis ELSS</b> remained conservative, trading lower risk for lower returns.
+    Funds like <b>DSP</b> and <b>Mirae Asset</b> leveraged tactical diversification to outperform during market recovery phases.
+    </p>
+    </div>
+    """
+
+    # Individual fund summaries
+    fund_summaries = {
+        "Axis ELSS": """
+        <div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
+        <h4>Axis ELSS — Sectoral Trend Insights (2020–2024)</h4>
+        <p>
+        Axis ELSS displayed a <b>stable, conservative allocation</b> strategy focused on quality large-cap holdings. 
+        Exposure to Software and Finance remained steady (8–10%), while Banking gradually declined after 2020 before
+        recovering modestly in 2024. Pharma exposure increased during the pandemic, providing defensive resilience. 
+        Despite its low-volatility approach, the fund posted the <b>lowest CAGR (14.05%)</b> and <b>Sharpe Ratio (0.28)</b>, 
+        indicating limited upside potential during market recoveries.
+        </p>
+        </div>
+        """,
+        "DSP ELSS": """
+        <div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
+        <h4>DSP ELSS — Sectoral Trend Insights (2020–2024)</h4>
+        <p>
+        DSP ELSS exhibited <b>active tactical allocation</b>, reducing heavy Banking exposure (~55% in 2020)
+        while increasing allocations to IT and Pharmaceuticals. From 2021 onward, the fund achieved balanced diversification
+        across Financials, Pharma, and Software. This strategic rotation drove strong recovery and superior outcomes,
+        with a <b>CAGR of 22.19%</b> and <b>Sharpe Ratio of 1.10</b>. DSP’s proactive portfolio management demonstrates
+        timely responsiveness to evolving market conditions and sectoral opportunities.
+        </p>
+        </div>
+        """,
+        "Mirae Asset ELSS": """
+        <div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
+        <h4>Mirae Asset ELSS — Sectoral Trend Insights (2020–2024)</h4>
+        <p>
+        Mirae Asset ELSS followed a <b>steady large-cap-oriented approach</b>, maintaining consistent Banking (23–28%)
+        and IT (8–13%) exposure. Post-2022, it tactically increased allocation to Petroleum Products and Automobiles,
+        capturing the reopening and infrastructure recovery trends. With a <b>CAGR of 21.10%</b> and <b>Sharpe Ratio of 0.82</b>,
+        the fund delivered strong performance though cyclical bets introduced moderate volatility in returns.
+        </p>
+        </div>
+        """,
+        "HDFC ELSS": """
+        <div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
+        <h4>HDFC ELSS — Sectoral Trend Insights (2020–2024)</h4>
+        <p>
+        HDFC ELSS adopted a <b>high-conviction, large-cap concentrated</b> strategy anchored in Banking and IT.
+        Banking exposure surged from ~25% (2020) to over 60% (2024), complemented by Software and Pharma holdings
+        during 2021–2023. This disciplined focus produced one of the <b>best risk-adjusted performances</b> among peers,
+        achieving a <b>CAGR of 21.80%</b> and <b>Sharpe Ratio of 1.21</b>. The fund’s approach reflects strong confidence
+        in stable, high-quality financial institutions and large-cap technology leaders.
+        </p>
+        </div>
+        """,
+        "SBI ELSS": """
+        <div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
+        <h4>SBI ELSS — Sectoral Trend Insights (2020–2024)</h4>
+        <p>
+        SBI ELSS maintained a <b>balanced and diversified portfolio</b> across all key sectors.
+        Banking exposure (15–18%) remained moderate, while Software steadily increased, reflecting
+        a shift toward technology-led growth. Pharma peaked in 2021 as a defensive buffer and later stabilized,
+        while cyclical sectors like Petroleum and Finance were trimmed. 
+        The fund achieved the <b>highest CAGR (24.50%)</b> and <b>Sharpe Ratio (1.22)</b>, 
+        signifying outstanding risk-adjusted performance driven by effective sector rotation 
+        and prudent diversification.
+        </p>
+        </div>
+        """
+    }
+
+    # Display logic
+    if len(selected_funds) == 1:
+        fund_name = selected_funds[0]
+        if fund_name in fund_summaries:
+            st.markdown(fund_summaries[fund_name], unsafe_allow_html=True)
+        else:
+            st.info("No fund-specific summary available.")
+    else:
+        st.markdown(all_funds_summary, unsafe_allow_html=True)
+
+
+# ---- Example usage ----
+# Call this after your sectoral trend chart section
+# Example: sectoral_trend_analysis_summary(selected_funds)
+
+sectoral_trend_analysis_summary(selected_funds)
