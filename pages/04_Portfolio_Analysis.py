@@ -362,7 +362,7 @@ st.markdown(
     """
 <div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
 
-  <h4>Analysis Summary: Sectoral Allocation of ELSS Funds</h4>
+ 
 
   <p>
   The <b>sectoral allocation analysis</b> of the selected <b>ELSS funds</b> reveals how different fund houses 
@@ -533,16 +533,12 @@ fig_bar.update_layout(
 )
 st.plotly_chart(fig_bar, use_container_width=True)
 
-# Provide pivot download
-st.markdown("### Underlying pivot (selected month)")
-pivot_display = pivot.reset_index().rename(columns={industry_col: "Sector"})
-st.dataframe(pivot_display.style.format({c: "{:.2f}%" for c in pivot_display.columns if c != "Sector"}))
 
 st.markdown(
     """
 <div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
 
-  <h4>Analysis Summary: Sectoral Allocation Overview (Grouped Bar Chart)</h4>
+
 
   <p>
   The sectoral allocation comparison highlights how each <b>ELSS fund</b> strategically positions its investments 
@@ -682,10 +678,10 @@ import streamlit as st
 
 def sectoral_trend_analysis_summary(selected_funds, all_funds_list):
     """
-    Displays fund-wise or combined sectoral trend summaries based on selections.
-    - If exactly 1 fund selected => show that fund's detailed summary.
-    - If selection equals all available funds => show the combined comparative summary.
-    - If multiple (but not all) selected => show summaries for each selected fund (in order).
+    Robust display of sectoral trend summaries:
+      - If exactly 1 fund selected => show that fund's detailed summary.
+      - If selection equals all available funds => show combined comparative summary.
+      - If multiple but not all selected => show summaries for each selected fund.
     """
 
     # Combined summary when all funds are selected
@@ -702,23 +698,23 @@ def sectoral_trend_analysis_summary(selected_funds, all_funds_list):
     </p>
 
     <ul>
-    <li><b>Axis ELSS:</b> Followed a stable, quality-focused strategy with moderate sectoral diversification. 
+      <li><b>Axis ELSS:</b> Followed a stable, quality-focused strategy with moderate sectoral diversification. 
       Exposure to Software and Finance remained steady (~8–10%), while Banking declined post-2020 before modest recovery in 2024. 
       Its defensive allocation yielded low volatility but limited upside potential, reflected in a <b>CAGR of 14.05%</b> 
       and <b>Sharpe Ratio of 0.28</b>.</li>
 
-    <li><b>DSP ELSS:</b> Demonstrated dynamic reallocation, cutting Bank exposure from ~55% (2020) to ~25% (2024) 
+      <li><b>DSP ELSS:</b> Demonstrated dynamic reallocation, cutting Bank exposure from ~55% (2020) to ~25% (2024) 
       and increasing stakes in IT and Pharma. This diversification supported a robust <b>CAGR of 22.19%</b> 
       and <b>Sharpe Ratio of 1.10</b>, showcasing timely tactical shifts aligned with market opportunities.</li>
 
-    <li><b>Mirae Asset ELSS:</b> Maintained consistent Banking (23–28%) and IT (8–13%) exposure while taking tactical positions
+      <li><b>Mirae Asset ELSS:</b> Maintained consistent Banking (23–28%) and IT (8–13%) exposure while taking tactical positions
       in Petroleum and Automobiles post-2022, capturing reopening-led gains. It achieved a <b>CAGR of 21.10%</b> 
       and <b>Sharpe Ratio of 0.82</b> with moderate volatility from cyclical bets.</li>
 
-    <li><b>HDFC ELSS:</b> Pursued a high-conviction, large-cap concentrated strategy anchored in Banking and IT, 
+      <li><b>HDFC ELSS:</b> Pursued a high-conviction, large-cap concentrated strategy anchored in Banking and IT, 
       raising bank exposure significantly and delivering a <b>CAGR of 21.80%</b> and <b>Sharpe Ratio of 1.21</b>.</li>
 
-    <li><b>SBI ELSS:</b> Maintained a balanced and diversified allocation, driving the highest performance among peers
+      <li><b>SBI ELSS:</b> Maintained a balanced and diversified allocation, driving the highest performance among peers
       with <b>CAGR of 24.50%</b> and <b>Sharpe Ratio of 1.22</b>, reflecting superior sector rotation and risk management.</li>
     </ul>
 
@@ -729,7 +725,7 @@ def sectoral_trend_analysis_summary(selected_funds, all_funds_list):
     </div>
     """
 
-    # Per-fund summaries keyed by canonical identifiers (keys are lower-case short names to ease matching)
+    # Per-fund canonical summaries (explicit mapping)
     fund_summaries = {
         "Axis": """
         <div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
@@ -794,75 +790,53 @@ def sectoral_trend_analysis_summary(selected_funds, all_funds_list):
         """
     }
 
-    # helper to match a selected fund name to a canonical key
-    def match_fund_key(fund_name):
-        fn = fund_name.lower()
-        # common checks for substring matching
-        if "axis" in fn:
-            return "axis"
-        if "dsp" in fn:
-            return "dsp"
-        if "mirae" in fn:
-            return "mirae"
-        if "hdfc" in fn:
-            return "hdfc"
-        if "sbi" in fn:
-            return "sbi"
-        # fallback: try exact startswith matches
-        for k in fund_summaries.keys():
-            if k in fn:
-                return k
-        return None
-
-    # Display logic
-    # Normalize lists
+    # Normalize inputs
     sel = selected_funds or []
     all_list = all_funds_list or []
 
-    # Case 1: exactly one selected -> show that fund summary (if matched)
+    # helper: check if selection equals all funds (case-insensitive compare of canonical lists)
+    def is_selection_all():
+        sel_lower = set([s.strip().lower() for s in sel])
+        all_lower = set([a.strip().lower() for a in all_list])
+        return sel_lower == all_lower
+
+    # CASE 1: Single fund
     if len(sel) == 1:
-        key = match_fund_key(sel[0])
-        if key and key in fund_summaries:
-            with st.expander(f"Sectoral Trend Insights — {sel[0]}", expanded=True):
-                st.markdown(fund_summaries[key], unsafe_allow_html=True)
-            return
-        else:
-            st.info("Detailed summary for the selected fund is not available.")
-            return
-
-    # Case 2: selection matches all funds -> show combined comparative summary
-    if set(map(str.lower, sel)) == set(map(str.lower, all_list)):
-        with st.expander("Comparative Sectoral Trend Summary — All Funds", expanded=True):
-            st.markdown(all_funds_summary, unsafe_allow_html=True)
+        fund_name = sel[0]
+        # match exact canonical key (case-insensitive)
+        for key in fund_summaries:
+            if fund_name.strip().lower() == key.strip().lower():
+                st.markdown(f"<div style='margin-bottom:8px'>{fund_summaries[key]}</div>", unsafe_allow_html=True)
+                return
+        # fallback if no exact match
+        st.info(f"No detailed summary available for the selected fund: {fund_name}")
         return
 
-    # Case 3: multiple but not all selected -> show per-selected-fund summaries
+    # CASE 2: All funds selected -> show combined summary
+    if is_selection_all():
+        st.markdown(all_funds_summary, unsafe_allow_html=True)
+        return
+
+    # CASE 3: multiple selected but not all -> show each selected fund's summary if available
     if len(sel) > 1:
-        with st.expander("Sectoral Trend Insights — Selected Funds", expanded=True):
-            shown_any = False
-            for fund in sel:
-                key = match_fund_key(fund)
-                if key and key in fund_summaries:
-                    st.markdown(f"<h5 style='margin-bottom:6px'>{fund}</h5>", unsafe_allow_html=True)
+        for fund_name in sel:
+            matched = False
+            for key in fund_summaries:
+                if fund_name.strip().lower() == key.strip().lower():
+                    st.markdown(f"<h5 style='margin-top:10px'>{fund_name}</h5>", unsafe_allow_html=True)
                     st.markdown(fund_summaries[key], unsafe_allow_html=True)
-                    shown_any = True
-                else:
-                    st.markdown(f"<p><b>{fund}:</b> No summary available.</p>", unsafe_allow_html=True)
-            if not shown_any:
-                st.info("No detailed summaries matched the selected funds.")
+                    matched = True
+                    break
+            if not matched:
+                st.markdown(f"<p><b>{fund_name}:</b> No detailed summary available.</p>", unsafe_allow_html=True)
         return
 
-    # Default fallback
+    # Default fallback: show combined summary
     st.markdown(all_funds_summary, unsafe_allow_html=True)
 
+# earlier in your code
 all_funds = sorted(df[fund_col].unique().tolist())
-selected_funds = st.sidebar.multiselect("Select Fund Houses", options=all_funds, default=all_funds)
+
 
 # later, call:
 sectoral_trend_analysis_summary(selected_funds, all_funds)
-# -------------------------
-# Usage example — call this with your sidebar-selected funds and full fund list
-# selected_funds (from sidebar multiselect) and all_funds_list (the complete list of funds)
-# e.g. sectoral_trend_analysis_summary(selected_funds, all_funds)
-# -------------------------
-st.write(selected_funds)
