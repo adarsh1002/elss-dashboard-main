@@ -526,4 +526,60 @@ fig.update_layout(
 
 # Display
 st.plotly_chart(fig, use_container_width=True)
+st.markdown(
+    """
+<div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
 
+  <h4>Interpretation: Cost-Effectiveness and Performance Alignment</h4>
+
+  <p>
+  Each bubble in the chart represents an <b>ELSS scheme</b>, with its size proportional to the <b>average Sharpe Ratio</b>—a measure of risk-adjusted efficiency. 
+  The <b>X-axis</b> plots the median <b>Expense Ratio (%)</b>, while the <b>Y-axis</b> shows the median <b>3-Year Return (%)</b>, enabling a direct view of each fund’s 
+  cost-to-performance balance.
+  </p>
+
+  <ul>
+    <li><b>Mirae Asset ELSS Tax Saver Fund:</b> The most cost-efficient fund, combining the <b>lowest median expense ratio (≈ 0.55%)</b> 
+    with the <b>highest median 3-year return (≈ 20.1%)</b> and a strong <b>Sharpe Ratio of 0.70</b>. 
+    It delivers maximum return per unit of cost and risk, ideal for long-term ELSS investors.</li>
+
+    <li><b>DSP ELSS Tax Saver Fund:</b> Offers an excellent risk-return balance with a <b>median 3-year return of ≈ 19.8%</b> 
+    and a moderate <b>expense ratio of ≈ 0.82%</b>. 
+    Its <b>Sharpe Ratio (0.67)</b> indicates efficient risk management, making it a strong, balanced choice.</li>
+
+    <li><b>SBI Long Term Equity Fund:</b> Maintains a higher cost (<b>≈ 1.19%</b>) but compensates with robust returns (<b>≈ 18.6%</b>) 
+    and the <b>highest Sharpe Ratio (0.74)</b>. 
+    Suitable for investors prioritizing <b>risk-adjusted efficiency</b> even at a slightly higher fee.</li>
+
+    <li><b>Axis ELSS Tax Saver Fund:</b> Displays the weakest performance, with <b>median return ≈ 12.9%</b> and <b>Sharpe Ratio 0.45</b>. 
+    While costs are moderate (<b>≈ 0.79%</b>), its limited return efficiency reduces overall attractiveness.</li>
+
+    <li><b>HDFC ELSS Tax Saver Fund:</b> The <b>least cost-efficient</b> option, showing the <b>highest expense ratio (≈ 1.23%)</b> 
+    and only <b>moderate returns (≈ 15.6%)</b>. 
+    Its <b>Sharpe Ratio (0.37)</b> is the lowest, indicating poor risk-adjusted performance relative to cost.</li>
+  </ul>
+
+  <p>
+  The analysis demonstrates that <b>lower-cost schemes</b> such as Mirae Asset and DSP consistently outperform in both absolute and 
+  risk-adjusted terms, proving that efficient management can yield strong investor outcomes without high fees. 
+  Conversely, higher-cost options like HDFC and Axis underperformed in cost-return efficiency, while SBI maintained a premium 
+  position supported by superior risk control.
+  </p>
+
+  <h5>Summary of Findings</h5>
+  <p>
+  This chapter evaluated the <b>cost-effectiveness</b> of leading ELSS funds by examining <b>expense ratios</b>, 
+  <b>3-year returns</b>, and <b>Sharpe Ratios</b>. 
+  The <b>boxplot analysis</b> revealed variation in monthly expense structures (2020–2024), with 
+  <b>Mirae Asset</b> as the lowest-cost and most consistent scheme, and <b>HDFC</b> as the highest-cost. 
+  The subsequent <b>bubble-chart analysis</b> mapped cost, performance, and risk efficiency simultaneously, confirming that 
+  <b>low-cost funds (Mirae Asset and DSP)</b> delivered superior value, while <b>HDFC and Axis</b> lagged in both 
+  return efficiency and stability. 
+  These insights highlight that investors should evaluate not only returns but also <b>how efficiently those returns are delivered</b>, 
+  considering both <b>expenses</b> and <b>risk-adjusted performance</b> to make informed long-term investment decisions in ELSS.
+  </p>
+
+</div>
+    """,
+    unsafe_allow_html=True
+)
