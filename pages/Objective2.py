@@ -102,7 +102,7 @@ except Exception as e:
     st.stop()
 
 # Sidebar controls (reuse shared variables if present)
-st.sidebar.header("Filters (Chapter 2)")
+st.sidebar.header("Controls - Risk & Volatility Analysis")
 all_schemes = sorted(sd_raw["Scheme Name"].unique().tolist())
 if "selected_schemes" in globals():
     # if shared controls exist, use them
@@ -160,4 +160,75 @@ fig.update_xaxes(type="category")  # keep discrete years in order
 # Display chart
 st.plotly_chart(fig, use_container_width=True)
 
-s
+st.markdown(
+    """
+    <div style="text-align: justify; line-height:1.5; font-family: Arial, sans-serif;">
+      <h4>Interpretation of the Standard Deviation (Volatility) Bar Plot</h4>
+      <p>
+        The bar plot reveals that volatility was highest between <b>2020 and 2022</b>, reflecting the market turbulence caused by the COVID-19 shock and related macroeconomic disruptions. 
+        Certain schemes — notably <b>DSP Tax Saver</b> and <b>Mirae Asset ELSS</b> — exhibited elevated standard deviations (>22%) in 2021–2022, which coincided with very strong 1-year returns that year. 
+        This pattern supports the classical risk–return trade-off: higher volatility in these funds was, during that period, accompanied by higher short-term returns.
+      </p>
+
+      <p>
+        By contrast, funds such as <b>HDFC ELSS</b> displayed consistently lower volatility across the period, trading off upside potential for stability — a profile that appeals to risk-averse investors. 
+        <b>SBI Long Term Equity Fund</b> demonstrated a balanced profile with moderate volatility and robust multi-horizon returns, indicating efficient risk management with growth orientation. 
+        <b>Axis ELSS</b> recorded relatively muted volatility by 2024 but simultaneously showed weaker returns, raising questions about its risk-adjusted efficiency.
+      </p>
+
+      <p>
+        Overall, the bar plot underscores that higher short-term volatility in some ELSS schemes was often associated with higher short-term returns, while lower volatility funds tended to deliver steadier but more moderate performance. 
+        Investors should therefore evaluate funds not only on absolute returns but on how returns compensate for the volatility undertaken — i.e., on a risk-adjusted basis.
+      </p>
+
+      <h4>Scheme-level Summary</h4>
+      <table style="width:100%; border-collapse: collapse; font-size:13px;">
+        <thead>
+          <tr>
+            <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">Scheme</th>
+            <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">Risk (Std Dev)</th>
+            <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">Return Profile</th>
+            <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">Inference</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:8px; border-bottom:1px solid #f0f0f0;"><b>HDFC ELSS</b></td>
+            <td style="padding:8px; border-bottom:1px solid #f0f0f0;">Very low</td>
+            <td style="padding:8px; border-bottom:1px solid #f0f0f0;">Low–moderate (11.9%–25.3%)</td>
+            <td style="padding:8px; border-bottom:1px solid #f0f0f0;">Conservative; suitable for stability-seeking investors.</td>
+          </tr>
+          <tr>
+            <td style="padding:8px; border-bottom:1px solid #f0f0f0;"><b>Mirae Asset ELSS</b></td>
+            <td style="padding:8px; border-bottom:1px solid #f0f0f0;">High → moderate</td>
+            <td style="padding:8px; border-bottom:1px solid #f0f0f0;">High (5Y: ~25.1%; 1Y spikes)</td>
+            <td style="padding:8px; border-bottom:1px solid #f0f0f0;">Strong risk–reward balance; attractive for growth-oriented investors.</td>
+          </tr>
+          <tr>
+            <td style="padding:8px; border-bottom:1px solid #f0f0f0;"><b>DSP Tax Saver</b></td>
+            <td style="padding:8px; border-bottom:1px solid #f0f0f0;">High</td>
+            <td style="padding:8px; border-bottom:1px solid #f0f0f0;">High (e.g., 1Y: ~32.7%)</td>
+            <td style="padding:8px; border-bottom:1px solid #f0f0f0;">Aggressive, growth-oriented; higher volatility compensated by high short-term returns.</td>
+          </tr>
+          <tr>
+            <td style="padding:8px; border-bottom:1px solid #f0f0f0;"><b>SBI Long Term Equity Fund</b></td>
+            <td style="padding:8px; border-bottom:1px solid #f0f0f0;">Moderate</td>
+            <td style="padding:8px; border-bottom:1px solid #f0f0f0;">Strong (1Y ~26.9%; 3Y ~17.4%)</td>
+            <td style="padding:8px; border-bottom:1px solid #f0f0f0;">Balanced performer — suitable for moderate-to-high risk investors seeking consistent growth.</td>
+          </tr>
+          <tr>
+            <td style="padding:8px;"><b>Axis ELSS</b></td>
+            <td style="padding:8px;">Moderate (lower by 2024)</td>
+            <td style="padding:8px;">Low–average (5Y ~13.5%)</td>
+            <td style="padding:8px;">Risk-controlled but underperforming; limited reward for risk taken.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p style="margin-top:10px;">
+        <small><b>Note:</b> Values cited (returns and volatility) are approximate and drawn from the analysis period. Investors should consider multiple metrics (including beta and Sharpe ratio) and their investment horizon before drawing final conclusions.</small>
+      </p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
