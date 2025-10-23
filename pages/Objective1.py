@@ -448,8 +448,8 @@ smooth_window = st.sidebar.selectbox("Rolling window (months)", options=[1, 3, 6
                                     help="If smoothing enabled, resample to month-end and apply a rolling mean over this many months.")
 
 # Main-body radio for horizon selection
-st.subheader("Returns Trend Analysis")
-horizon = st.radio("Choose return horizon to display:", options=["1-Year", "3-Year", "5-Year"], index=0, horizontal=True)
+st.subheader("Choose return horizon to display:")
+horizon = st.radio("", options=["1-Year", "3-Year", "5-Year"], index=0, horizontal=True)
 
 # Map radio to internal column name
 col_map = {"1-Year": "Return_1Y_raw", "3-Year": "Return_3Y_raw", "5-Year": "Return_5Y_raw"}
