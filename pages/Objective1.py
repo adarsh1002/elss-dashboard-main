@@ -197,8 +197,8 @@ import plotly.graph_objects as go
 AUM_FILE = "data/Data_Obj1.xlsx"  # your AUM excel file path
 
 @st.cache_data
-def load_and_clean_aum(path=AUM_FILE, sheet_name=None):
-    df_a = pd.read_excel(path, sheet_name=sheet_name)
+def load_and_clean_aum(path=AUM_FILE):
+    df_a = pd.read_excel(path)
     df_a.columns = [c.strip() for c in df_a.columns]
     # required columns check (try to detect)
     if "NAV Date" not in df_a.columns:
