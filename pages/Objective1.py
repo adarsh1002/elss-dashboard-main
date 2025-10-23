@@ -448,7 +448,7 @@ smooth_window = st.sidebar.selectbox("Rolling window (months)", options=[1, 3, 6
                                     help="If smoothing enabled, resample to month-end and apply a rolling mean over this many months.")
 
 # Main-body radio for horizon selection
-st.markdown("## Choose return horizon to display:")
+st.markdown("### Choose return horizon to display:")
 horizon = st.radio("", options=["1-Year", "3-Year", "5-Year"], index=0, horizontal=True)
 
 # Map radio to internal column name
@@ -536,5 +536,37 @@ else:
                 )
 
         st.plotly_chart(fig, use_container_width=True)
+if horizon == "1-Year":
+    text_an="""
+<div style="text-align: justify;">
+The 1-Year return trends exhibit pronounced volatility, reflective of short-term market fluctuations and external shocks such as the COVID-19 pandemic.
+Key observations:
+<ul>COVID-19 Impact: Early 2020 witnessed a sharp decline across all funds, with negative 1-Year returns during March–May 2020.</ul>
+<ul>Strong Recovery: An unprecedented rally was observed from mid-2020 through mid-2021, where most schemes peaked with 1-Year returns exceeding 70%-80%, driven by a low base and massive market recovery.</ul>
+<ul>Post-Recovery Volatility: Post-2021, returns normalized but remained volatile due to global inflation fears, rate hikes, and geopolitical tensions.</ul>
+<ul>Fund Performance: SBI and Mirae Asset consistently stayed at the higher end of the return spectrum, whereas Axis ELSS frequently trailed behind.</ul>
+</div>
+"""
+elif horizon == "3-Year":
+    text_an="""
+<div style="text-align: justify;">
+The 3-Year return trends are comparatively smoother, highlighting the benefits of medium-term investing:
+<ul>Stability Increases: Return lines demonstrate reduced volatility compared to 1-Year trends, affirming that medium-term holding periods buffer against market noise.</ul>
+<ul>Superior Funds: SBI Long Term Equity Fund outperformed consistently with 3-Year returns peaking above 25% in mid-2022.</ul>
+<ul>Mirae and DSP Strength: Mirae Asset and DSP ELSS funds also maintained robust 3-Year returns (18%-22% range).</ul>
+<ul>Axis ELSS Concern: Axis ELSS underperformed with 3-Year returns around 12%-14%, significantly lower than peers and even lower than broader market indices during some periods.</ul>
+</div>
+"""
+else:  # 5-Year
+    text_an="""
+<div style="text-align: justify;">
+The 5-Year return panel captures the true long-term performance and relative resilience of the funds. All schemes exhibit smooth upward trends, indicating that equity investments reward patient investors over long horizons.
+ SBI Long Term Equity Fund maintained a leading position with 5-Year returns consistently above 22% toward the end of 2024. DSP and Mirae Asset followed with solid performances, showcasing returns around 18%-20%. Despite market growth, Axis ELSS lagged, with a 5-Year return (~15%) close to that of the NIFTY 50 index (~14%), implying negligible alpha generation over long-term horizons.
+</div>
+"""
+st.markdown(text_an, unsafe_allow_html=True)
+
+
+
 
        
