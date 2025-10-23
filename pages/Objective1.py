@@ -361,28 +361,36 @@ RET_FILE = "data/Data_Obj1.xlsx"  # your returns excel file path
 
 # -------------------------
 # Returns Trend (uses exact column names from your file)
-# ------------------------
+# ----------------------
 
 @st.cache_data
-def load_returns_exact(path=RET_FILE):
-    # read excel (single sheet expected)
+def load_returns_file(path=RET_FILE):
+    """
+    Load the returns workbook. Expects columns:
+      - 'NAV Date' (or similar date column)
+      - 'Scheme Name' (or similar scheme/fund column)
+      - 'Return 1 Year (%) Direct'
+      - 'Return 3 Year (%) Direct'
+      - 'Return 5 Year (%) Direct'
+    The loader maps these exact return columns to internal names and coerces to numeric.
+    """
     raw = pd.read_excel(path)
-    # if pandas returns dict (multiple sheets), take first
+    # if pandas returned dict (multiple sheets) pick first sheet automatically
     if isinstance(raw, dict):
         raw = list(raw.values())[0].copy()
     df = raw.copy()
+    # normalize column names
     df.columns = [c.strip() if isinstance(c, str) else c for c in df.columns]
 
-    # Ensure required columns exist
-    required = {"NAV Date", "Scheme Name",
-                "Return 1 Year (%) Direct", "Return 3 Year (%) Direct", "Return 5 Year (%) Direct"}
-    # allow missing return columns but require NAV Date and Scheme Name
+    # Ensure NAV Date column exists (try to detect common alternatives)
     if "NAV Date" not in df.columns:
         possible_date = [c for c in df.columns if isinstance(c, str) and "date" in c.lower()]
         if possible_date:
             df = df.rename(columns={possible_date[0]: "NAV Date"})
         else:
             raise ValueError("No 'NAV Date' column found in returns file.")
+
+    # Ensure Scheme Name exists (try to detect)
     if "Scheme Name" not in df.columns:
         possible_scheme = [c for c in df.columns if isinstance(c, str) and ("scheme" in c.lower() or "fund" in c.lower())]
         if possible_scheme:
@@ -390,148 +398,154 @@ def load_returns_exact(path=RET_FILE):
         else:
             raise ValueError("No 'Scheme Name' column found in returns file.")
 
-    # parse date
-    df["NAV Date"] = pd.to_datetime(df["NAV Date"], errors="coerce")
-    df["Scheme Name"] = df["Scheme Name"].astype(str).str.strip()
-
-    # create uniform columns mapping using the exact names
-    df = df.rename(columns={
+    # Map exact return column names to internal names (if present)
+    mapping = {
         "Return 1 Year (%) Direct": "Return_1Y_raw",
         "Return 3 Year (%) Direct": "Return_3Y_raw",
         "Return 5 Year (%) Direct": "Return_5Y_raw"
-    })
+    }
+    df = df.rename(columns={k: v for k, v in mapping.items() if k in df.columns})
 
-    # coerce to numeric
-    for c in ["Return_1Y_raw", "Return_3Y_raw", "Return_5Y_raw"]:
-        if c in df.columns:
-            df[c] = pd.to_numeric(df[c], errors="coerce")
-        else:
-            df[c] = np.nan
+    # Create columns if missing (filled with NaN)
+    for internal in mapping.values():
+        if internal not in df.columns:
+            df[internal] = np.nan
 
-    # drop rows missing date or scheme
+    # Parse and coerce
+    df["NAV Date"] = pd.to_datetime(df["NAV Date"], errors="coerce")
+    df["Scheme Name"] = df["Scheme Name"].astype(str).str.strip()
+    for internal in mapping.values():
+        df[internal] = pd.to_numeric(df[internal], errors="coerce")
+
+    # Drop rows without date or scheme
     df = df.dropna(subset=["NAV Date", "Scheme Name"]).sort_values(["Scheme Name", "NAV Date"]).reset_index(drop=True)
     return df
 
-# load returns
+# Load returns data
 try:
-    returns_all = load_returns_exact()
+    returns_all = load_returns_file()
 except FileNotFoundError:
-    st.error(f"Returns file not found: {RET_FILE}. Please place it in the data/ folder.")
+    st.error(f"Returns file not found at: {RET_FILE}. Please place it in the data/ folder.")
     st.stop()
 except Exception as e:
     st.error(f"Error loading returns file: {e}")
     st.stop()
 
-# Use existing sidebar controls if present; otherwise create local ones
+# Reuse shared controls if present, else create local sidebar controls
 if "selected_schemes" not in globals():
     schemes_list = sorted(returns_all["Scheme Name"].unique().tolist())
-    selected_schemes = st.sidebar.multiselect("Select Schemes (returns)", options=schemes_list, default=schemes_list)
+    selected_schemes = st.sidebar.multiselect("Select Scheme(s) for Returns", options=schemes_list, default=schemes_list)
 if "start_date" not in globals():
     min_dt = returns_all["NAV Date"].min().date()
     max_dt = returns_all["NAV Date"].max().date()
     start_date = st.sidebar.date_input("Start date (returns)", value=min_dt, min_value=min_dt, max_value=max_dt)
     end_date = st.sidebar.date_input("End date (returns)", value=max_dt, min_value=min_dt, max_value=max_dt)
 
-# smoothing controls (sidebar)
-st.sidebar.write("Smoothing (optional)")
-apply_smooth = st.sidebar.checkbox("Apply monthly smoothing + rolling mean", value=True)
-smooth_window = st.sidebar.selectbox("Rolling window (months)", options=[1, 3, 6], index=1)
+# Smoothing controls
+st.sidebar.markdown("**Smoothing & Resampling**")
+apply_smooth = st.sidebar.checkbox("Apply monthly resample + rolling mean", value=True)
+smooth_window = st.sidebar.selectbox("Rolling window (months)", options=[1, 3, 6], index=1,
+                                    help="If smoothing enabled, resample to month-end and apply a rolling mean over this many months.")
 
-# main-body radio to choose horizon
+# Main-body radio for horizon selection
 st.subheader("Returns Trend Analysis")
 horizon = st.radio("Choose return horizon to display:", options=["1-Year", "3-Year", "5-Year"], index=0, horizontal=True)
 
-# map radio to dataframe column names (we used raw renames earlier)
+# Map radio to internal column name
 col_map = {"1-Year": "Return_1Y_raw", "3-Year": "Return_3Y_raw", "5-Year": "Return_5Y_raw"}
 sel_col = col_map[horizon]
 
-# filter data by chosen schemes and date range
+# Filter data by chosen schemes and date range
 mask = (returns_all["NAV Date"].dt.date >= start_date) & (returns_all["NAV Date"].dt.date <= end_date)
 mask &= returns_all["Scheme Name"].isin(selected_schemes)
 df_filtered = returns_all.loc[mask, ["Scheme Name", "NAV Date", sel_col]].copy()
 df_filtered = df_filtered.rename(columns={sel_col: "Return_pct"})
 
-# defensive checks
+# Defensive checks
+df_filtered["Return_pct"] = pd.to_numeric(df_filtered["Return_pct"], errors="coerce")
+df_filtered = df_filtered.dropna(subset=["Return_pct", "NAV Date", "Scheme Name"]).sort_values(["Scheme Name", "NAV Date"]).reset_index(drop=True)
+
 if df_filtered.empty:
-    st.info("No return data available for the chosen horizon / schemes / date range. Adjust controls.")
+    st.info("No return data available for the chosen horizon/schemes/date range. Adjust controls.")
 else:
-    # drop NaNs in Return_pct
-    df_filtered["Return_pct"] = pd.to_numeric(df_filtered["Return_pct"], errors="coerce")
-    df_filtered = df_filtered.dropna(subset=["Return_pct"]).sort_values(["Scheme Name", "NAV Date"]).reset_index(drop=True)
-
-    if df_filtered.empty:
-        st.info("No numeric return values available after filtering.")
+    # Smoothing & resampling (per-scheme) -> produce plot_df with columns [Scheme Name, NAV Date, Return_pct]
+    if apply_smooth and smooth_window > 1:
+        parts = []
+        for scheme, g in df_filtered.groupby("Scheme Name"):
+            # resample to month-end using last observed value within month
+            g_monthly = g.set_index("NAV Date")[["Return_pct"]].resample("M").last().dropna()
+            if g_monthly.empty:
+                continue
+            # rolling mean on the single column -> 1-D result
+            g_monthly["Return_pct"] = g_monthly["Return_pct"].rolling(window=smooth_window, min_periods=1).mean()
+            g_monthly = g_monthly.reset_index()
+            g_monthly["Scheme Name"] = scheme
+            parts.append(g_monthly[["Scheme Name", "NAV Date", "Return_pct"]])
+        plot_df = pd.concat(parts, ignore_index=True) if parts else df_filtered[["Scheme Name", "NAV Date", "Return_pct"]].copy()
     else:
-        # if smoothing requested: resample to month-end and apply rolling mean per scheme
-        if apply_smooth and smooth_window > 1:
-            tmp = []
-            for scheme, g in df_filtered.groupby("Scheme Name"):
-                g = g.set_index("NAV Date").resample("M").last().dropna(subset=["Return_pct"])
-                if g.empty:
+        plot_df = df_filtered[["Scheme Name", "NAV Date", "Return_pct"]].copy()
+
+    # Final type safety & dropna
+    plot_df["NAV Date"] = pd.to_datetime(plot_df["NAV Date"], errors="coerce")
+    plot_df["Return_pct"] = pd.to_numeric(plot_df["Return_pct"], errors="coerce")
+    plot_df["Scheme Name"] = plot_df["Scheme Name"].astype(str)
+    plot_df = plot_df.dropna(subset=["NAV Date", "Return_pct", "Scheme Name"]).sort_values(["Scheme Name", "NAV Date"]).reset_index(drop=True)
+
+    if plot_df.empty:
+        st.info("No data to plot after smoothing/resampling.")
+    else:
+        # Interactive Plotly line chart (one line per scheme)
+        fig = px.line(
+            plot_df,
+            x="NAV Date",
+            y="Return_pct",
+            color="Scheme Name",
+            labels={"Return_pct": f"{horizon} Return (%)", "NAV Date": "Date"},
+            template="plotly_white",
+            title=f"{horizon} Returns Trend - Selected Schemes"
+        )
+        fig.update_traces(mode="lines+markers")
+        fig.update_layout(hovermode="x unified",
+                          legend=dict(title="Scheme", orientation="v", x=1.02, y=1))
+        fig.update_yaxes(ticksuffix="%", tickformat=".2f")
+        fig.update_xaxes(rangeslider_visible=True)
+
+        # Add per-year annotations (first available point in each year)
+        years = range(start_date.year, end_date.year + 1)
+        schemes_plot = plot_df["Scheme Name"].unique().tolist()
+        palette = px.colors.qualitative.Plotly
+        color_map = {s: palette[i % len(palette)] for i, s in enumerate(schemes_plot)}
+        for scheme in schemes_plot:
+            srows = plot_df[plot_df["Scheme Name"] == scheme]
+            for yr in years:
+                yr_pts = srows[srows["NAV Date"].dt.year == yr]
+                if yr_pts.empty:
                     continue
-                g["Return_sm"] = g["Return_pct"].rolling(window=smooth_window, min_periods=1).mean()
-                g = g.reset_index().rename(columns={"Return_sm": "Return_pct"})
-                g["Scheme Name"] = scheme
-                tmp.append(g[["Scheme Name", "NAV Date", "Return_pct"]])
-            plot_df = pd.concat(tmp, ignore_index=True) if tmp else df_filtered.copy()
-        else:
-            plot_df = df_filtered.copy()
+                pt = yr_pts.iloc[0]
+                # Add annotation
+                fig.add_annotation(
+                    x=pt["NAV Date"],
+                    y=pt["Return_pct"],
+                    text=f"{pt['Return_pct']:.1f}%",
+                    showarrow=True,
+                    arrowhead=1,
+                    ax=8,
+                    ay=-8,
+                    font=dict(size=9, color=color_map[scheme]),
+                    bgcolor="rgba(255,255,255,0.7)"
+                )
 
-        # Ensure plot_df clean
-        plot_df = plot_df.dropna(subset=["NAV Date", "Return_pct", "Scheme Name"])
-        if plot_df.empty:
-            st.info("No data to plot after smoothing/resampling.")
-        else:
-            # Plotly line chart (one line per scheme)
-            fig = px.line(
-                plot_df,
-                x="NAV Date",
-                y="Return_pct",
-                color="Scheme Name",
-                labels={"Return_pct": f"{horizon} Return (%)", "NAV Date": "Date"},
-                template="plotly_white",
-                title=f"{horizon} Returns Trend - Selected Schemes"
-            )
-            fig.update_traces(mode="lines+markers")
-            fig.update_layout(hovermode="x unified", legend=dict(title="Scheme", orientation="v", x=1.02, y=1))
-            fig.update_yaxes(ticksuffix="%", tickformat=".2f")
-            fig.update_xaxes(rangeslider_visible=True)
+        st.plotly_chart(fig, use_container_width=True)
 
-            # Add per-year annotations (first available point each year)
-            years = range(start_date.year, end_date.year + 1)
-            schemes_plot = plot_df["Scheme Name"].unique().tolist()
-            palette = px.colors.qualitative.Plotly
-            color_map = {s: palette[i % len(palette)] for i, s in enumerate(schemes_plot)}
-            for scheme in schemes_plot:
-                srows = plot_df[plot_df["Scheme Name"] == scheme]
-                for yr in years:
-                    yr_pts = srows[srows["NAV Date"].dt.year == yr]
-                    if yr_pts.empty:
-                        continue
-                    pt = yr_pts.iloc[0]
-                    fig.add_annotation(
-                        x=pt["NAV Date"],
-                        y=pt["Return_pct"],
-                        text=f"{pt['Return_pct']:.1f}%",
-                        showarrow=True,
-                        arrowhead=1,
-                        ax=8,
-                        ay=-8,
-                        font=dict(size=9, color=color_map[scheme]),
-                        bgcolor="rgba(255,255,255,0.7)"
-                    )
+        # Data preview & download
+        st.markdown("### Data used for this chart (preview)")
+        st.dataframe(plot_df.head(400))
 
-            st.plotly_chart(fig, use_container_width=True)
+        @st.cache_data
+        def to_csv_bytes(df_):
+            return df_.to_csv(index=False).encode("utf-8")
 
-            # Data preview and download
-            st.markdown("### Data used for this chart (preview)")
-            st.dataframe(plot_df.sort_values(["Scheme Name", "NAV Date"]).reset_index(drop=True).head(400))
-
-            @st.cache_data
-            def to_csv(df_):
-                return df_.to_csv(index=False).encode("utf-8")
-
-            st.download_button(f"Download {horizon} returns data (CSV)",
-                               data=to_csv(plot_df),
-                               file_name=f"returns_{horizon.replace(' ', '')}.csv",
-                               mime="text/csv")
+        st.download_button(f"Download {horizon} returns data (CSV)",
+                           data=to_csv_bytes(plot_df),
+                           file_name=f"returns_{horizon.replace(' ', '')}.csv",
+                           mime="text/csv")
