@@ -315,21 +315,21 @@ st.markdown(
   investment philosophies and levels of aggressiveness among fund houses.
   </p>
 
-  <ul>
-    <li><b>Axis ELSS Tax Saver Fund:</b> Exhibits a pronounced large-cap bias (≈ 70.7%), 
+<ul>
+<li><b>Axis ELSS Tax Saver Fund:</b> Exhibits a pronounced large-cap bias (≈ 70.7%), 
     moderate mid-cap exposure (≈ 23.8%), and minimal small-cap allocation (≈ 3%). 
     This conservative structure prioritizes <b>stability and reduced volatility</b>.</li>
 
-    <li><b>HDFC ELSS Tax Saver Fund:</b> Follows a predominantly large-cap strategy (≈ 73.7%) 
+<li><b>HDFC ELSS Tax Saver Fund:</b> Follows a predominantly large-cap strategy (≈ 73.7%) 
     complemented by small-cap exposure of around 11.6%, balancing <b>steady growth with limited risk-taking</b>.</li>
 
-    <li><b>DSP and Mirae Asset ELSS Funds:</b> Demonstrate more <b>aggressive allocation patterns</b> 
+<li><b>DSP and Mirae Asset ELSS Funds:</b> Demonstrate more <b>aggressive allocation patterns</b> 
     with smaller large-cap weights and higher small-cap exposure — 
     14.5% for DSP and 21.9% for Mirae Asset — reflecting a <b>higher risk-reward orientation</b>.</li>
 
-    <li><b>SBI Long Term Equity Fund:</b> Maintains a <b>balanced and diversified allocation</b> 
+<li><b>SBI Long Term Equity Fund:</b> Maintains a <b>balanced and diversified allocation</b> 
     across all segments, with slightly higher liquidity (≈ 8.9%) to manage short-term market fluctuations.</li>
-  </ul>
+</ul>
 
   <p>
   Funds with higher <b>mid- and small-cap exposure</b> — such as <b>DSP, Mirae Asset,</b> and <b>SBI</b> — 
