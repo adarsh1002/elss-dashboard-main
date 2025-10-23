@@ -4,10 +4,11 @@ import matplotlib.pyplot as plt
 import plotly.express as px
 st.set_page_config(page_title=" Risk & Volatility", layout="wide")
 st.title("2. Risk and Volatility Analysis")
+st.subheader("Introduction")
 st.markdown(
     """
     <div style="text-align: justify;">
-      <h4>Introduction</h4>
+      
       <p>
         Investment decisions in equity-linked instruments, such as Equity Linked Savings Schemes (ELSS), require a careful balance between risk and return.
         While ELSS funds offer investors the dual advantage of potential capital appreciation and tax benefits under Section 80C of the Income Tax Act, 1961,
@@ -741,3 +742,54 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+st.subheader("Chapter Summary")
+st.markdown(
+    """
+<div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
+
+  <h4>Summary of Risk Profile Findings</h4>
+
+  <p>
+  The multi-dimensional risk profile analysis—spanning <b>Standard Deviation</b> (volatility), 
+  <b>Beta</b> (market sensitivity), and <b>Sharpe Ratio</b> (risk-adjusted return)—offers a holistic understanding 
+  of how the selected ELSS schemes behaved and evolved between <b>2020 and 2024</b>.
+  </p>
+
+  <p>
+  <b>Volatility patterns</b> revealed that fund risk levels peaked during <b>2020–2022</b> amid macroeconomic disruptions, 
+  before gradually stabilizing by 2024. Most schemes converged below the category average volatility of <b>17.03%</b>. 
+  <b>HDFC ELSS</b> consistently maintained the lowest volatility, 
+  while <b>DSP</b> and <b>Mirae Asset ELSS</b> exhibited higher fluctuations yet delivered stronger returns, 
+  reflecting the classic <b>risk–return trade-off</b>.
+  </p>
+
+  <p>
+  <b>Beta analysis</b> indicated that most funds maintained values around <b>1.0</b>, 
+  reflecting broad market alignment. 
+  <b>Mirae Asset</b> and <b>HDFC ELSS</b> strategically reduced their betas, signaling a move toward stability, 
+  while <b>DSP</b> and <b>SBI</b> retained a balanced, market-linked posture.
+  </p>
+
+  <p>
+  <b>Sharpe Ratio trends</b> captured fund efficiency in converting risk into returns. 
+  Funds like <b>Mirae Asset ELSS</b> showed improving Sharpe Ratios alongside declining volatility, 
+  highlighting superior risk-adjusted management. 
+  In contrast, <b>Axis ELSS</b> displayed inconsistent Sharpe performance despite moderate risk levels, 
+  indicating suboptimal return efficiency.
+  </p>
+
+  <p>
+  The <b>trajectory-based Beta–Sharpe analysis</b> visually reinforced these patterns by mapping each fund’s annual evolution. 
+  It identified managers that actively optimized risk-return efficiency versus those with reactive or inconsistent strategies.
+  </p>
+
+  <p>
+  <b>Overall,</b> the findings emphasize that effective ELSS evaluation requires more than absolute return comparison. 
+  Integrating volatility, market responsiveness, and reward-for-risk metrics provides a more complete framework 
+  for informed, long-term investment decisions aligned with investor risk tolerance and performance objectives.
+  </p>
+
+</div>
+    """,
+    unsafe_allow_html=True
+)
