@@ -633,6 +633,7 @@ fig.update_layout(
     height=380 * n_rows,
     margin=dict(t=100, b=60, l=60, r=160),
     font=dict(size=13)
+    ,width=1300
 )
 
 st.subheader("Beta–Sharpe Trajectories (based on SD filters)")
