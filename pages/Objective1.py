@@ -2,14 +2,14 @@ import pandas as pd
 import streamlit as st
 import matplotlib.pyplot as plt
 import plotly.express as px
-st.title("Comparative Analysis of Fund Performance")
+st.title("1. Comparative Analysis of Fund Performance")
 st.markdown("""
 The objective of this chapter is to conduct an in-depth comparative analysis of five leading ELSS mutual funds in India over the period 2020–2024. 
 By examining the interplay of NAV growth, Assets Under Management (AUM) dynamics, and multi-period return performances, 
 this chapter seeks to unveil critical insights into fund strategies, management efficiency, and investor behavior patterns. 
 Rather than treating performance metrics in isolation, a cross-linked approach is adopted to demonstrate how various factors—such as fund size, risk-taking ability, and sectoral exposure—collectively influence investor outcomes. 
             """)
-st.subheader("NAV GROWTH ANALYSIS")
+st.subheader("1.1 NAV GROWTH ANALYSIS")
 st.markdown("""
 The Net Asset Value (NAV) represents the per-unit market value of a mutual fund.
 It is the price at which investors buy (purchase price) or sell (redemption price) units of a fund. 
@@ -180,3 +180,9 @@ Funds like **HDFC** and **DSP** show relatively stable and consistent growth wit
 
 A comparative analysis with the **NIFTY 50** returns over the corresponding period, which stood at approximately **14% (NIFTY50 n.d.)**, indicates that all selected ELSS schemes significantly outperformed the benchmark index, with the exception of the **Axis ELSS Tax Saver Fund**. The performance of the Axis ELSS Tax Saver Fund was largely comparable to the NIFTY 50, reflecting a relatively modest return in contrast to its peers.
 """)
+st.subheader("1.2 ASSETS UNDER MANAGEMENT (AUM) ANALYSIS")
+st.markdown("""
+            <div style="text-align: justify;">
+**Assets Under Management (AUM)** are influenced by (i) net investor inflows and (ii) capital appreciation. However, a large AUM does not inherently guarantee superior returns; 
+            it might also lead to challenges in nimble portfolio management.</div>""")
+
