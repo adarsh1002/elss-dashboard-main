@@ -166,15 +166,3 @@ st.dataframe(agg.sort_values(["Year", "Standard Deviation"], ascending=[True, Fa
 
 @st.cache_data
 
-# Short explanatory note
-st.markdown(
-    """
-    <div style="text-align: justify;">
-    <small>
-    <b>Note:</b> Values shown are the annual average of monthly standard deviations reported for each scheme (2019 excluded). 
-    Standard deviation is expressed in percentage points. Hover over bars for exact values. Use the filters on the left to select different schemes and year ranges.
-    </small>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
