@@ -41,10 +41,9 @@ st.markdown(
   </p>
 </div>""",
     unsafe_allow_html=True)
-st.markdown(
-    """<div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
+st.markdown("""
+<div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
   <h5>Methodology Overview</h5>
-
     <ul>
     <li><b>Data Sources:</b> Expense ratio data was primarily sourced from official fund fact sheets released monthly by the respective AMCs. 
     Where data gaps existed, official websites were used to extract TER information for Direct Plans.</li>
@@ -67,13 +66,13 @@ st.markdown(
     </li>
     </ul>
 
-     <p>
+    <p>
     Overall, this analysis enables a nuanced understanding of <b>cost-to-return efficiency</b> within ELSS mutual funds, 
     helping investors identify schemes that not only perform well but also optimize expenses for long-term wealth creation.
     </p>
 
 </div>
-    """,
+""",
     unsafe_allow_html=True
 )
 
@@ -250,3 +249,5 @@ fig.update_yaxes(title_text="Scheme Name", automargin=True)
 
 # Display
 st.plotly_chart(fig, use_container_width=True)
+
+st.subheader("")
