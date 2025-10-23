@@ -636,8 +636,108 @@ fig.update_layout(
     ,width=1300
 )
 
-st.subheader("Beta–Sharpe Trajectories (based on SD filters)")
+
 st.plotly_chart(fig, use_container_width=True)
 
+st.markdown(
+    """
+<div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
 
+  <h4>Interpretation: Beta–Sharpe Trajectory Analysis of ELSS Schemes (2020–2024)</h4>
+
+  <p>
+  Each panel highlights one scheme’s annual movement, with directional arrows indicating the evolution of its risk–return profile over time. 
+  Other schemes are shown in the background to provide contextual comparison. 
+  The trajectory of each fund reflects how its market sensitivity (Beta) and risk-adjusted return efficiency (Sharpe Ratio) have evolved 
+  through different market cycles between 2020 and 2024.
+  </p>
+
+  <h5>Interpretation of Fund-wise Movement Patterns</h5>
+
+  <ul>
+    <li><b>Mirae Asset ELSS Tax Saver Fund:</b> The trajectory for Mirae Asset shows a strategically favorable shift. 
+    It began with a relatively high Beta (~1.03) in 2020, indicating higher exposure to market volatility, 
+    and gradually reduced it to ~0.91 by 2024—adopting a more conservative stance. 
+    Simultaneously, its Sharpe Ratio improved from around 0.45 to 0.78, reflecting enhanced efficiency in generating returns per unit of risk. 
+    This trend suggests active portfolio management through sectoral rebalancing and reduced exposure to high-beta stocks.</li>
+
+    <li><b>DSP ELSS Tax Saver Fund:</b> DSP maintained a consistently high Beta (~1.00–1.02), reflecting strong market alignment. 
+    However, its Sharpe Ratio fluctuated during the volatile 2022 period before recovering in 2023–2024. 
+    The pattern suggests a cyclical, market-sensitive strategy suitable for investors with higher risk tolerance 
+    who seek alpha during bullish market phases.</li>
+
+    <li><b>Axis ELSS Tax Saver Fund:</b> Axis displayed a non-linear path, with Beta fluctuating between 0.95 and 1.03 and no consistent upward trend in the Sharpe Ratio. 
+    This lack of strategic progression implies intermittent portfolio adjustments without lasting impact—possibly due to frequent sectoral shifts or managerial turnover.</li>
+
+    <li><b>HDFC ELSS Tax Saver Fund:</b> HDFC demonstrated the most conservative and stable movement, maintaining Beta values between 0.85–0.89 
+    and Sharpe Ratios around 0.45–0.55. 
+    This consistency indicates a risk-controlled, capital-preserving approach suitable for long-term, risk-averse investors.</li>
+
+    <li><b>SBI Long Term Equity Fund:</b> SBI’s trajectory reflects calculated improvement in efficiency. 
+    Its Beta remained close to 1.00, maintaining balanced market exposure, while the Sharpe Ratio steadily increased over the years. 
+    This indicates a structured, steady approach to improving returns without raising risk exposure, aligning with disciplined fund management practices.</li>
+  </ul>
+
+  <p>
+  Overall, the trajectory visualization allows investors to assess not only where each fund stands today, but how it has evolved over time. 
+  It distinguishes between funds with clear, proactive strategies and those showing inconsistent or reactive behavior, 
+  enabling better evaluation of consistency, adaptability, and long-term reliability.
+  </p>
+
+  <h5>Summary Table: Risk–Return Evolution Highlights (2020–2024)</h5>
+  <table style="width:100%; border-collapse: collapse; font-size:13px;">
+    <thead>
+      <tr>
+        <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">Scheme Name</th>
+        <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">Beta Trend</th>
+        <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">Sharpe Trend</th>
+        <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">Key Strategic Insight</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="padding:8px; border-bottom:1px solid #f0f0f0;"><b>Mirae Asset ELSS</b></td>
+        <td style="padding:8px; border-bottom:1px solid #f0f0f0;">Decreasing</td>
+        <td style="padding:8px; border-bottom:1px solid #f0f0f0;">Increasing</td>
+        <td style="padding:8px; border-bottom:1px solid #f0f0f0;">De-risked portfolio while boosting efficiency.</td>
+      </tr>
+      <tr>
+        <td style="padding:8px; border-bottom:1px solid #f0f0f0;"><b>DSP ELSS</b></td>
+        <td style="padding:8px; border-bottom:1px solid #f0f0f0;">Stable (~1.0)</td>
+        <td style="padding:8px; border-bottom:1px solid #f0f0f0;">Cyclical</td>
+        <td style="padding:8px; border-bottom:1px solid #f0f0f0;">Market-aligned; performs well in momentum-driven markets.</td>
+      </tr>
+      <tr>
+        <td style="padding:8px; border-bottom:1px solid #f0f0f0;"><b>Axis ELSS</b></td>
+        <td style="padding:8px; border-bottom:1px solid #f0f0f0;">Fluctuating</td>
+        <td style="padding:8px; border-bottom:1px solid #f0f0f0;">Inconsistent</td>
+        <td style="padding:8px; border-bottom:1px solid #f0f0f0;">No clear strategic improvement; limited conversion of risk into returns.</td>
+      </tr>
+      <tr>
+        <td style="padding:8px; border-bottom:1px solid #f0f0f0;"><b>HDFC ELSS</b></td>
+        <td style="padding:8px; border-bottom:1px solid #f0f0f0;">Stable (Low)</td>
+        <td style="padding:8px; border-bottom:1px solid #f0f0f0;">Stable (Moderate)</td>
+        <td style="padding:8px; border-bottom:1px solid #f0f0f0;">Conservative and consistent; suitable for stability-focused investors.</td>
+      </tr>
+      <tr>
+        <td style="padding:8px;"><b>SBI Long Term Equity Fund</b></td>
+        <td style="padding:8px;">Stable (~1.0)</td>
+        <td style="padding:8px;">Improving</td>
+        <td style="padding:8px;">Balanced risk and return with steady efficiency gains.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p style="margin-top:10px;">
+  In conclusion, the <b>trajectory-based analysis</b> offers a dynamic perspective on how each ELSS scheme evolved over five years 
+  in terms of its market sensitivity and risk-adjusted performance. 
+  By tracking the direction and magnitude of annual changes in Beta and Sharpe Ratio, 
+  it provides deeper insight into managerial responsiveness, portfolio discipline, and long-term adaptability — 
+  going beyond static metrics to reveal the true behavioral patterns of mutual fund strategies.
+  </p>
+
+</div>
+    """,
+    unsafe_allow_html=True
+)
 
