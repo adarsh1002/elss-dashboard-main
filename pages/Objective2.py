@@ -6,8 +6,8 @@ st.title("2. Risk and Volatility Analysis")
 st.markdown(
     """
     <div style="text-align: justify;">
-        <h4>Chapter Introduction: Risk and Volatility Analysis</h4>
-        <p>
+        
+    <p>
         Investment decisions in equity-linked instruments, such as Equity Linked Savings Schemes (ELSS), require a careful balance between risk and return. 
         While ELSS funds offer investors the dual advantage of potential capital appreciation and tax benefits under Section 80C of the Income Tax Act, 1961, 
         their equity-oriented nature exposes them to significant market-linked volatility. 
