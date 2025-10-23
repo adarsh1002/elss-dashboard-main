@@ -45,13 +45,11 @@ st.markdown(
     <li><b>Data Sources:</b> Expense ratio data was primarily sourced from official fund fact sheets released monthly by the respective AMCs. 
     Where data gaps existed, official websites were used to extract TER information for Direct Plans.</li>
 
-    <li><b>Time Period:</b> Data was compiled for the five calendar years from 2020 to 2024, 
-        aligning with the study's broader temporal scope. When monthly data was available, it was averaged to obtain annualized TERs.</li>
+    <li><b>Time Period:</b> Data was compiled for the five calendar years from 2020 to 2024, aligning with the study's broader temporal scope. When monthly data was available, it was averaged to obtain annualized TERs.</li>
 
     <li><b>Data Processing:</b> Python scripts were utilized to automate data extraction and compute annual averages for each fund, ensuring consistency and accuracy in analysis.</li>
 
-    <li><b>Comparative Analysis:</b> 
-        The following visualizations were employed to illustrate cost dynamics:
+    <li><b>Comparative Analysis:</b> The following visualizations were employed to illustrate cost dynamics:
          <ul>
             <li>Year-wise TER trends across all funds.</li>
             <li>Average TER comparison over five years.</li>
