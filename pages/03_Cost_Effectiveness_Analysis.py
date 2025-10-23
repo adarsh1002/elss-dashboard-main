@@ -66,10 +66,10 @@ st.markdown("""
     </li>
     </ul>
 
-    <p>
-    Overall, this analysis enables a nuanced understanding of <b>cost-to-return efficiency</b> within ELSS mutual funds, 
-    helping investors identify schemes that not only perform well but also optimize expenses for long-term wealth creation.
-    </p>
+<p>
+Overall, this analysis enables a nuanced understanding of <b>cost-to-return efficiency</b> within ELSS mutual funds, 
+helping investors identify schemes that not only perform well but also optimize expenses for long-term wealth creation.
+</p>
 
 </div>
 """,
