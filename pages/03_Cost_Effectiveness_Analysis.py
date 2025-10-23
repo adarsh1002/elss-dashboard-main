@@ -39,7 +39,10 @@ st.markdown(
   and evaluate how these costs influence net investor returns. 
   This dimension adds depth to the broader comparative financial performance study by linking fund expenses directly to return outcomes and efficiency.
   </p>
-
+</div>""",
+    unsafe_allow_html=True)
+st.markdown(
+    """<div style="text-align: justify; line-height:1.6; font-family: Arial, sans-serif;">
   <h5>Methodology Overview</h5>
 
   <ul>
