@@ -14,68 +14,70 @@ st.markdown(
   <h4>Objective 3: Cost Effectiveness of ELSS Schemes</h4>
 
   <p>
-    While performance and risk-adjusted returns often dominate mutual fund evaluation, the <b>expense ratio</b> remains an equally critical yet frequently overlooked metric. 
-     The expense ratio represents the annual fee charged to investors to cover a fund’s operating costs, including management fees, administrative expenses, distribution charges, and other associated costs. 
-     For <b>Equity Linked Savings Schemes (ELSS)</b>—which already carry a mandatory three-year lock-in period—higher expenses can significantly erode long-term gains, 
-     making cost-effectiveness a vital component of comparative analysis.
+  While performance and risk-adjusted returns often dominate mutual fund evaluation, the <b>expense ratio</b> remains an equally critical yet frequently overlooked metric. 
+  The expense ratio represents the annual fee charged to investors to cover a fund’s operating costs, including management fees, administrative expenses, distribution charges, and other associated costs. 
+  For <b>Equity Linked Savings Schemes (ELSS)</b>—which already carry a mandatory three-year lock-in period—higher expenses can significantly erode long-term gains, 
+  making cost-effectiveness a vital component of comparative analysis.
   </p>
 
   <p>
-    Since ELSS schemes are designed as <b>long-term tax-saving investments</b>, even marginal differences in expense ratios can compound substantially over time, 
-    directly impacting investor wealth creation. 
-     Fund houses adopt varying cost structures depending on their brand positioning, operational scale, and management philosophy. 
-    Some may justify higher fees through active management and proprietary research, while others may employ leaner structures in direct plans to attract retail investors seeking cost efficiency.
+  Since ELSS schemes are designed as <b>long-term tax-saving investments</b>, even marginal differences in expense ratios can compound substantially over time, 
+  directly impacting investor wealth creation. 
+  Fund houses adopt varying cost structures depending on their brand positioning, operational scale, and management philosophy. 
+  Some may justify higher fees through active management and proprietary research, while others may employ leaner structures in direct plans to attract retail investors seeking cost efficiency.
   </p>
 
   <p>
-    In this context, analyzing the <b>Total Expense Ratios (TERs)</b> of ELSS schemes across the top five Asset Management Companies (AMCs) in India 
-    provides insights into which funds offer the best <b>value for money</b>. 
-    The objective is to assess whether higher-cost funds deliver proportionately superior returns or if lower-cost schemes can achieve comparable performance, 
-     thereby offering superior cost efficiency.
+  In this context, analyzing the <b>Total Expense Ratios (TERs)</b> of ELSS schemes across the top five Asset Management Companies (AMCs) in India 
+  provides insights into which funds offer the best <b>value for money</b>. 
+  The objective is to assess whether higher-cost funds deliver proportionately superior returns or if lower-cost schemes can achieve comparable performance, 
+  thereby offering superior cost efficiency.
   </p>
 
   <p>
-    The focus of this analysis is to compare and interpret the <b>TERs of selected ELSS Direct Plans</b> over the five-year period from 2020 to 2024, 
-    and evaluate how these costs influence net investor returns. 
-    This dimension adds depth to the broader comparative financial performance study by linking fund expenses directly to return outcomes and efficiency.
+  The focus of this analysis is to compare and interpret the <b>TERs of selected ELSS Direct Plans</b> over the five-year period from 2020 to 2024, 
+  and evaluate how these costs influence net investor returns. 
+  This dimension adds depth to the broader comparative financial performance study by linking fund expenses directly to return outcomes and efficiency.
   </p>
 
   <h5>Methodology Overview</h5>
 
-  <ul>
+  <ul style="margin-top:0.5em; margin-bottom:0.5em;">
     <li><b>Data Sources:</b> Expense ratio data was primarily sourced from official fund fact sheets released monthly by the respective AMCs. 
     Where data gaps existed, official websites were used to extract TER information for Direct Plans.</li>
 
-    <li><b>Time Period:</b> Data was compiled for the five calendar years from 2020 to 2024, aligning with the study's broader temporal scope. When monthly data was available, it was averaged to obtain annualized TERs.</li>
+    <li><b>Time Period:</b> Data was compiled for the five calendar years from 2020 to 2024, aligning with the study’s broader temporal scope. 
+    When monthly data was available, it was averaged to obtain annualized TERs.</li>
 
     <li><b>Data Processing:</b> Python scripts were utilized to automate data extraction and compute annual averages for each fund, ensuring consistency and accuracy in analysis.</li>
 
     <li><b>Comparative Analysis:</b> The following visualizations were employed to illustrate cost dynamics:
-         <ul>
-            <li>Year-wise TER trends across all funds.</li>
-            <li>Average TER comparison over five years.</li>
-            <li>Correlation between TER and 5-year CAGR returns to evaluate cost efficiency.</li>
-        </ul>
+      <ul>
+        <li>Year-wise TER trends across all funds.</li>
+        <li>Average TER comparison over five years.</li>
+        <li>Correlation between TER and 5-year CAGR returns to evaluate cost efficiency.</li>
+      </ul>
     </li>
 
     <li><b>Key Metrics Derived:</b>
       <ul>
-        <li><b>5-Year Average TER</b> - to compare long-term cost positions.</li>
-        <li><b>Return per Expense Ratio Unit</b> - calculated as 5-year CAGR divided by average TER, indicating cost-efficiency of returns.</li>
-        <li><b>Fund Ranking</b> - based on cost-effectiveness metrics.</li>
+        <li><b>5-Year Average TER</b> – to compare long-term cost positions.</li>
+        <li><b>Return per Expense Ratio Unit</b> – calculated as 5-year CAGR divided by average TER, indicating cost-efficiency of returns.</li>
+        <li><b>Fund Ranking</b> – based on cost-effectiveness metrics.</li>
       </ul>
     </li>
   </ul>
 
   <p>
-    Overall, this analysis enables a nuanced understanding of <b>cost-to-return efficiency</b> within ELSS mutual funds, 
-     helping investors identify schemes that not only perform well but also optimize expenses for long-term wealth creation.
+  Overall, this analysis enables a nuanced understanding of <b>cost-to-return efficiency</b> within ELSS mutual funds, 
+  helping investors identify schemes that not only perform well but also optimize expenses for long-term wealth creation.
   </p>
 
 </div>
     """,
     unsafe_allow_html=True
 )
+
 st.subheader("Expense Ratio Spread")
 # ---------- Robust loader using month_year column ----------
 import streamlit as st
