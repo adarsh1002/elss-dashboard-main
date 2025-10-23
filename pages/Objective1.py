@@ -136,13 +136,29 @@ for scheme in df_indexed.columns:
     ))
 
 fig.update_layout(
-    title="Interactive Indexed NAV Trend of ELSS Mutual Funds",
+    title={
+        "text": "Interactive Indexed NAV Trend of ELSS Mutual Funds (2020–2024)",
+        "x": 0.05,  # left-align title a bit so it doesn't collide with legend
+        "xanchor": "left",
+        "yanchor": "top"
+    },
     xaxis_title="Date",
     yaxis_title="Indexed NAV (Base = 100)",
     hovermode="x unified",
     template="plotly_white",
-    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
-    margin=dict(t=80, b=40, l=40, r=40),
+    # --- Legend moved to the right ---
+    legend=dict(
+        orientation="v",          # vertical layout
+        yanchor="top",
+        y=1,                      # top align with plot
+        xanchor="left",
+        x=1.02,                   # place just outside the right border
+        title_text="Scheme Name",
+        bgcolor="rgba(255,255,255,0.8)",  # semi-transparent white box
+        bordercolor="lightgray",
+        borderwidth=1
+    ),
+    margin=dict(t=80, b=40, l=40, r=180),  # extra right margin for legend
     height=600
 )
 fig.update_xaxes(rangeslider_visible=True)   # allow range slider for quick zooming
@@ -151,12 +167,3 @@ fig.update_xaxes(rangeslider_visible=True)   # allow range slider for quick zoom
 st.plotly_chart(fig, use_container_width=True)
 
 # Optional: show the numeric table and a download button
-st.markdown("### Underlying data (sample)")
-st.dataframe(df_indexed.reset_index().rename(columns={"NAV Date": "Date"}).head(200))
-
-@st.cache_data
-def to_csv(df_):
-    return df_.to_csv(index=True).encode("utf-8")
-
-csv = to_csv(df_indexed)
-st.download_button("Download indexed NAV data (CSV)", data=csv, file_name="indexed_nav.csv", mime="text/csv")
