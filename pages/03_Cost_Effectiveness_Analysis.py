@@ -163,7 +163,7 @@ except FileNotFoundError:
     st.stop()
 
 # Sidebar controls
-st.sidebar.header("Filters")
+st.sidebar.header("Filters for the Expense Spread Plot")
 all_years = sorted(df["Year"].dropna().unique().astype(int).tolist())
 if not all_years:
     st.sidebar.warning("No year values detected in the data.")
@@ -427,7 +427,7 @@ df["Expense Ratio"] = pd.to_numeric(df["Expense Ratio"], errors="coerce")
 df["Return 3 Year"] = pd.to_numeric(df["Return 3 Year"], errors="coerce")
 
 # Optionally let user filter schemes (sidebar)
-st.sidebar.header("Controls")
+st.sidebar.header("Controls for Cost Efficiency Plot")
 all_schemes = sorted(df["Scheme Name"].dropna().unique().tolist())
 selected_schemes = st.sidebar.multiselect("Select scheme(s) to include", options=all_schemes, default=all_schemes)
 
