@@ -247,14 +247,18 @@ st.markdown(text_sharpe, unsafe_allow_html=True)
 # -------------------------
 # Sharpe Ratio section (REUSES Standard Deviation filters; no new filters created)
 # -------------------------
+# -------------------------
+# Sharpe Ratio section — reuse SD filters (years and schemes only)
+# -------------------------
 import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
+from datetime import date
 
-DATA_PATH = "data/Data_Obective2_final.xlsx"
+DATA_PATH = "data/Data_Obective2_final.xlsx"  # adjust if needed
 
-# Cached loader
+# Cached loader (only loads once per session / file change)
 @st.cache_data
 def _load_chapter2_data(path=DATA_PATH, sheet_name=0):
     raw = pd.read_excel(path, sheet_name=sheet_name)
@@ -263,7 +267,7 @@ def _load_chapter2_data(path=DATA_PATH, sheet_name=0):
     df = raw.copy()
     df.columns = [c.strip() if isinstance(c, str) else c for c in df.columns]
 
-    # detect columns
+    # Normalize columns
     if "Date" not in df.columns:
         poss = [c for c in df.columns if isinstance(c, str) and "date" in c.lower()]
         if poss:
@@ -272,7 +276,8 @@ def _load_chapter2_data(path=DATA_PATH, sheet_name=0):
         poss = [c for c in df.columns if isinstance(c, str) and ("scheme" in c.lower() or "fund" in c.lower())]
         if poss:
             df = df.rename(columns={poss[0]: "Scheme Name"})
-    # try detect sharpe column
+
+    # Detect sharpe column (fuzzy)
     sharpe_col = None
     if "Sharpe Ratio" in df.columns:
         sharpe_col = "Sharpe Ratio"
@@ -285,6 +290,7 @@ def _load_chapter2_data(path=DATA_PATH, sheet_name=0):
     if "Sharpe Ratio" not in df.columns:
         df["Sharpe Ratio"] = np.nan
 
+    # Clean types
     df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
     df["Scheme Name"] = df["Scheme Name"].astype(str).str.strip()
     df["Sharpe Ratio"] = pd.to_numeric(df["Sharpe Ratio"], errors="coerce")
@@ -292,12 +298,12 @@ def _load_chapter2_data(path=DATA_PATH, sheet_name=0):
     df = df.dropna(subset=["Date", "Scheme Name"]).reset_index(drop=True)
     return df
 
-# load into session_state once
+# Ensure data loaded into session_state (so we don't re-read file every interaction)
 if "chapter2_df" not in st.session_state:
     try:
         st.session_state["chapter2_df"] = _load_chapter2_data()
     except FileNotFoundError:
-        st.error(f"Data file not found: {DATA_PATH}. Place it in data/ before running.")
+        st.error(f"Chapter 2 data file not found: {DATA_PATH}. Please place it in data/ and reload.")
         st.stop()
     except Exception as e:
         st.error(f"Error loading chapter 2 data: {e}")
@@ -305,58 +311,52 @@ if "chapter2_df" not in st.session_state:
 
 df_ch2 = st.session_state["chapter2_df"]
 
-# REQUIRE: use the filters from Standard Deviation analysis
-# expected variables set by SD section: selected_schemes, selected_years, start_date, end_date
-missing = []
-if "selected_schemes" not in globals() and "selected_schemes" not in st.session_state:
-    missing.append("selected_schemes")
-if "selected_years" not in globals() and "selected_years" not in st.session_state:
-    missing.append("selected_years")
-if "start_date" not in globals() and "start_date" not in st.session_state:
-    missing.append("start_date")
-if "end_date" not in globals() and "end_date" not in st.session_state:
-    missing.append("end_date")
+# --- REQUIRE: reuse SD filters 'selected_years' and 'selected_schemes' ---
+# Try session_state first, then globals
+if "selected_years" in st.session_state:
+    sd_years = st.session_state["selected_years"]
+elif "selected_years" in globals():
+    sd_years = selected_years
+else:
+    sd_years = None
 
-if missing:
+if "selected_schemes" in st.session_state:
+    sd_schemes = st.session_state["selected_schemes"]
+elif "selected_schemes" in globals():
+    sd_schemes = selected_schemes
+else:
+    sd_schemes = None
+
+# Validate presence
+if not sd_years or not sd_schemes:
     st.error(
-        "Sharpe Ratio section requires filters defined by the Standard Deviation analysis. "
-        "Please run/apply the Standard Deviation filters first. Missing: " + ", ".join(missing)
+        "Sharpe Ratio chart requires the Standard Deviation filters to be applied first. "
+        "Please ensure you have selected Scheme(s) and Year(s in SD section)."
     )
 else:
-    # Prefer globals first, then session_state
-    if "selected_schemes" in globals():
-        schemes_filter = selected_schemes
-    else:
-        schemes_filter = st.session_state["selected_schemes"]
+    # Ensure sd_years is list of ints
+    try:
+        sd_years_int = [int(y) for y in sd_years]
+    except Exception:
+        sd_years_int = [int(y) for y in list(sd_years)]
 
-    if "selected_years" in globals():
-        years_filter = selected_years
-    else:
-        years_filter = st.session_state["selected_years"]
+    # derive date range from selected years: Jan 1 of min year to Dec 31 of max year
+    min_year = min(sd_years_int)
+    max_year = max(sd_years_int)
+    start_date_derived = pd.to_datetime(date(min_year, 1, 1))
+    end_date_derived = pd.to_datetime(date(max_year, 12, 31))
 
-    if "start_date" in globals():
-        sd = pd.to_datetime(start_date).date()
-    else:
-        sd = pd.to_datetime(st.session_state["start_date"]).date()
-    if "end_date" in globals():
-        ed = pd.to_datetime(end_date).date()
-    else:
-        ed = pd.to_datetime(st.session_state["end_date"]).date()
-
-    # Apply filters to the chapter2 dataframe
-    mask = df_ch2["Scheme Name"].isin(schemes_filter)
-    mask &= df_ch2["Date"].dt.date >= sd
-    mask &= df_ch2["Date"].dt.date <= ed
-    # If selected_years is a list of ints/strings, ensure dtype matches
-    years_filter_int = [int(y) for y in years_filter]
-    mask &= df_ch2["Year"].isin(years_filter_int)
-
+    # Apply filters: scheme, year, and derived date bounds (year filter is primary)
+    mask = df_ch2["Scheme Name"].isin(sd_schemes)
+    mask &= df_ch2["Year"].isin(sd_years_int)
+    # additionally ensure date falls within derived range (defensive)
+    mask &= (df_ch2["Date"] >= start_date_derived) & (df_ch2["Date"] <= end_date_derived)
     df_sharpe_filtered = df_ch2.loc[mask].copy()
 
     if df_sharpe_filtered.empty:
-        st.info("No Sharpe Ratio data after applying the Standard Deviation filters. Consider broadening the SD filters.")
+        st.info("No Sharpe Ratio data for the selected schemes/years. Try expanding the SD filter selection.")
     else:
-        # compute yearly mean sharpe per scheme
+        # compute yearly mean Sharpe ratio per scheme
         avg_sharpe = (
             df_sharpe_filtered.groupby(["Year", "Scheme Name"], as_index=False)["Sharpe Ratio"]
             .mean()
@@ -364,9 +364,9 @@ else:
         )
 
         if avg_sharpe["Sharpe Ratio"].isna().all():
-            st.warning("Sharpe Ratio column appears empty/non-numeric after filtering. Check source file.")
+            st.warning("Sharpe Ratio column appears empty or non-numeric for the filtered data. Check source file.")
         else:
-            # Plot
+            # Interactive Plotly line
             fig = px.line(
                 avg_sharpe,
                 x="Year",
@@ -374,18 +374,18 @@ else:
                 color="Scheme Name",
                 markers=True,
                 template="plotly_white",
-                title="Year-wise Average Sharpe Ratio (Using SD filters)"
+                title="Year-wise Average Sharpe Ratio (reusing SD years & schemes)"
             )
             fig.update_traces(line=dict(width=3), marker=dict(size=7))
             fig.update_layout(
                 hovermode="x unified",
                 legend=dict(title="Scheme", orientation="v", x=1.02, y=1),
                 margin=dict(t=90, b=80, l=60, r=220),
-                height=600,
+                height=580,
                 font=dict(size=13)
             )
 
-            st.subheader("Sharpe Ratio — Yearly Average (reusing SD filters)")
+            st.subheader("Sharpe Ratio — Yearly Average (using SD filters)")
             st.plotly_chart(fig, use_container_width=True)
 
-            
+           
