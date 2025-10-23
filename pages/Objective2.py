@@ -459,189 +459,184 @@ st.markdown(
 # Beta–Sharpe Trajectory panels (dashboard-ready)
 # -------------------------
 # ---------- Beta–Sharpe: robust cleaning, aggregation and plotting ----------
-import re
+# -------------------------
+# Beta–Sharpe Trajectory (using Standard Deviation filters)
+# -------------------------
 import streamlit as st
 import pandas as pd
 import numpy as np
-import plotly.express as px
 import plotly.graph_objects as go
+import plotly.express as px
 from plotly.subplots import make_subplots
 from math import ceil
-from datetime import date
 
-# assume df_ch2 already loaded and session_state/filters available as in previous block
+DATA_PATH = "data/Data_Obective2_final.xlsx"
 
-# --- CLEAN numeric columns robustly ---
-numeric_cols = ["Beta", "Sharpe Ratio", "Standard Deviation"]
-for col in numeric_cols:
-    if col in df_ch2.columns:
-        # convert to string, remove % , commas and any non-numeric except dot and minus
-        df_ch2[col] = (
-            df_ch2[col]
-            .astype(str)
-            .str.replace("%", "", regex=False)
-            .str.replace(",", "", regex=False)
-            .str.replace(r"[^\d\.\-]", "", regex=True)
-            .replace("", np.nan)
-        )
-        df_ch2[col] = pd.to_numeric(df_ch2[col], errors="coerce")
-    else:
-        # if column missing, create as NaN so subsequent code expects them
-        df_ch2[col] = np.nan
+# --- Load data once if not already loaded ---
+@st.cache_data
+def load_chapter2_data(path=DATA_PATH):
+    df = pd.read_excel(path)
+    df.columns = [c.strip() if isinstance(c, str) else c for c in df.columns]
+    if "Date" not in df.columns:
+        for c in df.columns:
+            if "date" in c.lower():
+                df = df.rename(columns={c: "Date"})
+                break
+    if "Scheme Name" not in df.columns:
+        for c in df.columns:
+            if "scheme" in c.lower() or "fund" in c.lower():
+                df = df.rename(columns={c: "Scheme Name"})
+                break
+    # Rename key columns if needed
+    if "Sharpe Ratio" not in df.columns:
+        for c in df.columns:
+            if "sharpe" in c.lower():
+                df = df.rename(columns={c: "Sharpe Ratio"})
+    if "Beta" not in df.columns:
+        for c in df.columns:
+            if "beta" in c.lower():
+                df = df.rename(columns={c: "Beta"})
+    if "Standard Deviation" not in df.columns:
+        for c in df.columns:
+            if "std" in c.lower() or "deviation" in c.lower():
+                df = df.rename(columns={c: "Standard Deviation"})
+    df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
+    df["Year"] = df["Date"].dt.year
+    # Clean numeric columns
+    for col in ["Sharpe Ratio", "Beta", "Standard Deviation"]:
+        if col in df.columns:
+            df[col] = (
+                df[col]
+                .astype(str)
+                .str.replace("%", "", regex=False)
+                .str.replace(",", "", regex=False)
+                .str.replace(r"[^\d\.\-]", "", regex=True)
+                .replace("", np.nan)
+            )
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+        else:
+            df[col] = np.nan
+    df = df.dropna(subset=["Scheme Name", "Year"]).reset_index(drop=True)
+    return df
 
-# Drop rows missing both Beta and Sharpe Ratio since they cannot be plotted
-df_ch2_clean = df_ch2.dropna(subset=["Beta", "Sharpe Ratio"], how="all").copy()
+if "chapter2_df" not in st.session_state:
+    st.session_state["chapter2_df"] = load_chapter2_data()
+df_ch2 = st.session_state["chapter2_df"]
 
-# Apply selected SD filters (reuse selected_years & selected_schemes)
-# Convert selected_years to ints
-try:
-    years_filter_int = [int(y) for y in years_filter]
-except Exception:
-    years_filter_int = [int(y) for y in list(years_filter)]
-
-mask = df_ch2_clean["Year"].isin(years_filter_int)
-mask &= df_ch2_clean["Scheme Name"].isin(schemes_filter)
-df_filtered_for_agg = df_ch2_clean.loc[mask].copy()
-
-if df_filtered_for_agg.empty:
-    st.info("No numeric Beta/Sharpe data available after cleaning and applying filters. Try broadening the filter selection.")
+# --- Reuse filters from Standard Deviation section ---
+if "selected_schemes" in st.session_state:
+    selected_schemes = st.session_state["selected_schemes"]
+elif "selected_schemes" in globals():
+    selected_schemes = selected_schemes
 else:
-    # Compute annual medians only on numeric columns
-    agg = (
-        df_filtered_for_agg.groupby(["Year", "Scheme Name"], as_index=False)[["Beta", "Sharpe Ratio", "Standard Deviation"]]
-        .median()
-        .reset_index(drop=True)
+    st.error("No 'selected_schemes' found. Please select schemes in the Standard Deviation section.")
+    st.stop()
+
+if "selected_years" in st.session_state:
+    selected_years = st.session_state["selected_years"]
+elif "selected_years" in globals():
+    selected_years = selected_years
+else:
+    st.error("No 'selected_years' found. Please select years in the Standard Deviation section.")
+    st.stop()
+
+# Convert years to int safely
+try:
+    selected_years_int = [int(y) for y in selected_years]
+except Exception:
+    selected_years_int = list(map(int, list(selected_years)))
+
+# --- Compute median Beta & Sharpe Ratio per Year & Scheme ---
+df_filtered = df_ch2[df_ch2["Year"].isin(selected_years_int)]
+median_df = (
+    df_filtered.groupby(["Year", "Scheme Name"], as_index=False)[
+        ["Beta", "Sharpe Ratio", "Standard Deviation"]
+    ].median()
+)
+median_df = median_df.dropna(subset=["Beta", "Sharpe Ratio"])
+if median_df.empty:
+    st.info("No valid Beta–Sharpe data for the selected filters.")
+    st.stop()
+
+# --- Prepare subplots ---
+focus_schemes = [s for s in selected_schemes if s in median_df["Scheme Name"].unique()]
+n = len(focus_schemes)
+n_cols = 2
+n_rows = ceil(n / n_cols)
+fig = make_subplots(rows=n_rows, cols=n_cols, subplot_titles=focus_schemes,
+                    horizontal_spacing=0.08, vertical_spacing=0.12)
+
+palette = px.colors.qualitative.Plotly
+beta_min, beta_max = median_df["Beta"].min(), median_df["Beta"].max()
+sharpe_min, sharpe_max = median_df["Sharpe Ratio"].min(), median_df["Sharpe Ratio"].max()
+beta_pad = (beta_max - beta_min) * 0.1
+sharpe_pad = (sharpe_max - sharpe_min) * 0.1
+x_range = [beta_min - beta_pad, beta_max + beta_pad]
+y_range = [sharpe_min - sharpe_pad, sharpe_max + sharpe_pad]
+
+# --- Plot each scheme panel ---
+for idx, scheme in enumerate(focus_schemes):
+    r = idx // n_cols + 1
+    c = idx % n_cols + 1
+
+    # background (light)
+    for other in median_df["Scheme Name"].unique():
+        data_other = median_df[median_df["Scheme Name"] == other].sort_values("Year")
+        fig.add_trace(
+            go.Scatter(
+                x=data_other["Beta"], y=data_other["Sharpe Ratio"],
+                mode="lines+markers",
+                line=dict(color="lightgray", width=1),
+                marker=dict(size=5, color="lightgray"),
+                opacity=0.4,
+                hoverinfo="skip",
+                showlegend=False
+            ),
+            row=r, col=c
+        )
+
+    # focus
+    df_focus = median_df[median_df["Scheme Name"] == scheme].sort_values("Year")
+    color = palette[idx % len(palette)]
+    fig.add_trace(
+        go.Scatter(
+            x=df_focus["Beta"], y=df_focus["Sharpe Ratio"],
+            mode="lines+markers+text",
+            line=dict(color=color, width=3),
+            marker=dict(size=8, color=color),
+            text=df_focus["Year"],
+            textposition="top right",
+            name=scheme,
+            showlegend=False
+        ),
+        row=r, col=c
     )
 
-    # Drop rows where either Beta or Sharpe is NaN (can't plot points)
-    agg = agg.dropna(subset=["Beta", "Sharpe Ratio"])
-    if agg.empty:
-        st.info("After aggregation, there is no Beta/Sharpe numeric data to plot for the selected filters.")
-    else:
-        # Proceed to plotting (same plotting logic as before)
-        available_schemes = sorted(agg["Scheme Name"].unique().tolist())
-        focus_schemes = [s for s in schemes_filter if s in available_schemes]
-        if not focus_schemes:
-            st.info("None of the selected schemes have Beta/Sharpe medians in the selected years.")
-        else:
-            n = len(focus_schemes)
-            n_cols = 2
-            n_rows = ceil(n / n_cols)
-            subplot_titles = focus_schemes
-            fig = make_subplots(rows=n_rows, cols=n_cols, subplot_titles=subplot_titles,
-                                horizontal_spacing=0.08, vertical_spacing=0.12)
+    # arrows between years
+    for i in range(len(df_focus) - 1):
+        x0, y0 = df_focus.iloc[i]["Beta"], df_focus.iloc[i]["Sharpe Ratio"]
+        x1, y1 = df_focus.iloc[i+1]["Beta"], df_focus.iloc[i+1]["Sharpe Ratio"]
+        fig.add_annotation(
+            x=x1, y=y1, ax=x0, ay=y0,
+            xref=f"x{idx+1}" if idx+1 > 1 else "x",
+            yref=f"y{idx+1}" if idx+1 > 1 else "y",
+            showarrow=True, arrowhead=3, arrowwidth=1.6, arrowcolor=color, opacity=0.8
+        )
 
-            palette = px.colors.qualitative.Plotly
+    fig.update_xaxes(title_text="Beta (Market Sensitivity)", range=x_range, row=r, col=c)
+    fig.update_yaxes(title_text="Sharpe Ratio (Risk-Adjusted Return)", range=y_range, row=r, col=c)
 
-            # axis ranges with padding
-            beta_min, beta_max = agg["Beta"].min(), agg["Beta"].max()
-            sharpe_min, sharpe_max = agg["Sharpe Ratio"].min(), agg["Sharpe Ratio"].max()
-            beta_pad = (beta_max - beta_min) * 0.12 if beta_max > beta_min else 0.5
-            sharpe_pad = (sharpe_max - sharpe_min) * 0.12 if sharpe_max > sharpe_min else 0.5
-            x_range = [beta_min - beta_pad, beta_max + beta_pad]
-            y_range = [sharpe_min - sharpe_pad, sharpe_max + sharpe_pad]
+# --- Layout ---
+fig.update_layout(
+    title_text="Beta–Sharpe Trajectories of ELSS Funds (Annual Medians, 2020–2024)",
+    template="plotly_white",
+    height=380 * n_rows,
+    margin=dict(t=100, b=60, l=60, r=160),
+    font=dict(size=13)
+)
 
-            for idx, scheme in enumerate(focus_schemes):
-                row = idx // n_cols + 1
-                col = idx % n_cols + 1
+st.subheader("Beta–Sharpe Trajectories (based on SD filters)")
+st.plotly_chart(fig, use_container_width=True)
 
-                # background schemes
-                for other in available_schemes:
-                    other_df = agg[agg["Scheme Name"] == other].sort_values("Year")
-                    if other_df.empty:
-                        continue
-                    fig.add_trace(
-                        go.Scatter(
-                            x=other_df["Beta"],
-                            y=other_df["Sharpe Ratio"],
-                            mode="lines+markers",
-                            line=dict(color="lightgray", width=1),
-                            marker=dict(size=6, color="lightgray"),
-                            name=other,
-                            showlegend=False,
-                            opacity=0.35,
-                            hoverinfo="skip"
-                        ),
-                        row=row, col=col
-                    )
 
-                # focus scheme
-                focus_df = agg[agg["Scheme Name"] == scheme].sort_values("Year")
-                colorscheme = palette[idx % len(palette)]
-                fig.add_trace(
-                    go.Scatter(
-                        x=focus_df["Beta"],
-                        y=focus_df["Sharpe Ratio"],
-                        mode="lines+markers",
-                        line=dict(color=colorscheme, width=3),
-                        marker=dict(size=8, color=colorscheme),
-                        name=scheme,
-                        showlegend=False,
-                        hovertemplate="<b>%{text}</b><br>Year: %{customdata[0]}<br>Beta: %{x:.3f}<br>Sharpe: %{y:.3f}<extra></extra>",
-                        text=[scheme]*len(focus_df),
-                        customdata=focus_df[["Year"]].values
-                    ),
-                    row=row, col=col
-                )
 
-                # arrows
-                for i in range(len(focus_df) - 1):
-                    x0, y0 = float(focus_df.iloc[i]["Beta"]), float(focus_df.iloc[i]["Sharpe Ratio"])
-                    x1, y1 = float(focus_df.iloc[i + 1]["Beta"]), float(focus_df.iloc[i + 1]["Sharpe Ratio"])
-                    fig.add_annotation(
-                        x=x1, y=y1,
-                        ax=x0, ay=y0,
-                        xref=f"x{(idx+1)}" if (idx+1) > 1 else "x",
-                        yref=f"y{(idx+1)}" if (idx+1) > 1 else "y",
-                        axref=f"x{(idx+1)}" if (idx+1) > 1 else "x",
-                        ayref=f"y{(idx+1)}" if (idx+1) > 1 else "y",
-                        showarrow=True,
-                        arrowhead=3,
-                        arrowsize=1,
-                        arrowwidth=1.6,
-                        arrowcolor=colorscheme,
-                        opacity=0.85
-                    )
-
-                # year labels
-                for i, rowdata in focus_df.reset_index(drop=True).iterrows():
-                    fig.add_annotation(
-                        x=float(rowdata["Beta"]),
-                        y=float(rowdata["Sharpe Ratio"]),
-                        text=str(int(rowdata["Year"])),
-                        showarrow=False,
-                        font=dict(size=10, color="black"),
-                        xref=f"x{(idx+1)}" if (idx+1) > 1 else "x",
-                        yref=f"y{(idx+1)}" if (idx+1) > 1 else "y",
-                        xanchor="left",
-                        yanchor="bottom",
-                        bgcolor="rgba(255,255,255,0.6)",
-                        bordercolor="rgba(0,0,0,0.05)",
-                        opacity=0.9
-                    )
-
-                fig.update_xaxes(title_text="Beta (Market Sensitivity)", range=x_range, row=row, col=col, zeroline=True)
-                fig.update_yaxes(title_text="Sharpe Ratio", range=y_range, row=row, col=col, zeroline=True)
-
-            # hide empty subplots
-            total_subplots = n_rows * n_cols
-            for empty_idx in range(len(focus_schemes), total_subplots):
-                r = empty_idx // n_cols + 1
-                c = empty_idx % n_cols + 1
-                fig.update_xaxes(visible=False, row=r, col=c)
-                fig.update_yaxes(visible=False, row=r, col=c)
-
-            fig.update_layout(
-                title_text="ELSS Schemes: Beta–Sharpe Trajectories (annual medians, 2020–2024)",
-                template="plotly_white",
-                height=380 * n_rows,
-                showlegend=False,
-                margin=dict(t=110, b=80, l=80, r=160),
-                hovermode="closest",
-                font=dict(size=13)
-            )
-
-            st.subheader("Beta–Sharpe Trajectories (annual medians)")
-            st.plotly_chart(fig, use_container_width=True)
-
-           
