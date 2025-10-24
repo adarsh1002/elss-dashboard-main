@@ -403,21 +403,21 @@ st.markdown(
   </p>
 
   <h5>Key Insights</h5>
-  <ul>
-    <li><b>Mirae Asset ELSS Fund</b> and <b>SBI Long Term Equity Fund</b> consistently improved their Sharpe Ratios over the five-year period, 
+<ul>
+<li><b>Mirae Asset ELSS Fund</b> and <b>SBI Long Term Equity Fund</b> consistently improved their Sharpe Ratios over the five-year period, 
     reaching values above <b>1.0</b> by 2023–2024. 
     This indicates efficient risk management and superior ability to deliver high-quality returns for the volatility undertaken.</li>
 
-    <li><b>DSP Tax Saver Fund</b> also showed a healthy trajectory, particularly after 2021, maintaining Sharpe Ratios near or above <b>1.0</b>. 
+<li><b>DSP Tax Saver Fund</b> also showed a healthy trajectory, particularly after 2021, maintaining Sharpe Ratios near or above <b>1.0</b>. 
     This reflects balanced risk-taking behavior and consistent performance under varying market conditions.</li>
 
-    <li><b>HDFC ELSS Tax Saver Fund</b> started with relatively low risk-adjusted efficiency but showed substantial improvement by 2024, 
+ <li><b>HDFC ELSS Tax Saver Fund</b> started with relatively low risk-adjusted efficiency but showed substantial improvement by 2024, 
     indicating effective portfolio realignment and enhanced compensation for the risk undertaken.</li>
 
-    <li><b>Axis ELSS Tax Saver Fund</b>, despite moderate volatility, showed inconsistent Sharpe Ratios throughout the study period. 
+<li><b>Axis ELSS Tax Saver Fund</b>, despite moderate volatility, showed inconsistent Sharpe Ratios throughout the study period. 
     Its declining trend after 2022 signals inefficiencies in converting risk exposure into meaningful returns, 
     raising concerns about its ability to sustain performance during shifting market conditions.</li>
-  </ul>
+</ul>
 
   <p>
   Overall, this analysis reinforces that <b>risk-adjusted return</b> is a more meaningful measure of performance than raw returns alone. 
