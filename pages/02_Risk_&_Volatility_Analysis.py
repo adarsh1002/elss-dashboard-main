@@ -771,28 +771,28 @@ st.markdown(
   <h5>Interpretation of Fund-wise Movement Patterns</h5>
 
   <ul>
-    <li><b>Mirae Asset ELSS Tax Saver Fund:</b> The trajectory for Mirae Asset shows a strategically favorable shift. 
+<li><b>Mirae Asset ELSS Tax Saver Fund:</b> The trajectory for Mirae Asset shows a strategically favorable shift. 
     It began with a relatively high Beta (~1.03) in 2020, indicating higher exposure to market volatility, 
     and gradually reduced it to ~0.91 by 2024—adopting a more conservative stance. 
     Simultaneously, its Sharpe Ratio improved from around 0.45 to 0.78, reflecting enhanced efficiency in generating returns per unit of risk. 
     This trend suggests active portfolio management through sectoral rebalancing and reduced exposure to high-beta stocks.</li>
 
-    <li><b>DSP ELSS Tax Saver Fund:</b> DSP maintained a consistently high Beta (~1.00–1.02), reflecting strong market alignment. 
+<li><b>DSP ELSS Tax Saver Fund:</b> DSP maintained a consistently high Beta (~1.00–1.02), reflecting strong market alignment. 
     However, its Sharpe Ratio fluctuated during the volatile 2022 period before recovering in 2023–2024. 
     The pattern suggests a cyclical, market-sensitive strategy suitable for investors with higher risk tolerance 
     who seek alpha during bullish market phases.</li>
 
-    <li><b>Axis ELSS Tax Saver Fund:</b> Axis displayed a non-linear path, with Beta fluctuating between 0.95 and 1.03 and no consistent upward trend in the Sharpe Ratio. 
+<li><b>Axis ELSS Tax Saver Fund:</b> Axis displayed a non-linear path, with Beta fluctuating between 0.95 and 1.03 and no consistent upward trend in the Sharpe Ratio. 
     This lack of strategic progression implies intermittent portfolio adjustments without lasting impact—possibly due to frequent sectoral shifts or managerial turnover.</li>
 
-    <li><b>HDFC ELSS Tax Saver Fund:</b> HDFC demonstrated the most conservative and stable movement, maintaining Beta values between 0.85–0.89 
+<li><b>HDFC ELSS Tax Saver Fund:</b> HDFC demonstrated the most conservative and stable movement, maintaining Beta values between 0.85–0.89 
     and Sharpe Ratios around 0.45–0.55. 
     This consistency indicates a risk-controlled, capital-preserving approach suitable for long-term, risk-averse investors.</li>
 
-    <li><b>SBI Long Term Equity Fund:</b> SBI’s trajectory reflects calculated improvement in efficiency. 
+<li><b>SBI Long Term Equity Fund:</b> SBI’s trajectory reflects calculated improvement in efficiency. 
     Its Beta remained close to 1.00, maintaining balanced market exposure, while the Sharpe Ratio steadily increased over the years. 
     This indicates a structured, steady approach to improving returns without raising risk exposure, aligning with disciplined fund management practices.</li>
-  </ul>
+</ul>
 
   <p>
   Overall, the trajectory visualization allows investors to assess not only where each fund stands today, but how it has evolved over time. 
